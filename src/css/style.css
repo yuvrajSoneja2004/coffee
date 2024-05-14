@@ -78,3 +78,18 @@
   body {
     background: #F1F5F9;
   }
+
+  * {
+    font-family: "Satoshi";
+    
+  }
+
+
+  @font-face {
+    font-family: 'Satoshi';
+    src: url('../fonts/Satoshi-Black.woff') format('woff2'),
+         url('../fonts/Satoshi-Black.woff2') format('woff');
+    font-weight: normal;
+    font-style: normal;
+  }
+  

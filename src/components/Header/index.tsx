@@ -11,7 +11,7 @@ const Header = (props: {
 }) => {
   return (
     <header className="z-999 sticky top-0 flex w-full bg-white shadow-md">
-      <div className="shadow-2 flex flex-grow items-center justify-between px-4 py-4 md:px-6 2xl:px-11">
+      <div className="flex flex-grow items-center justify-between px-4 py-4 shadow-2 md:px-6 2xl:px-11">
         <div className="flex items-center gap-2 sm:gap-4 lg:hidden">
           {/* <!-- Hamburger Toggle BTN --> */}
           <button
@@ -92,12 +92,6 @@ const Header = (props: {
                   />
                 </svg>
               </button>
-
-              <input
-                type="text"
-                placeholder="Type to search..."
-                className="xl:w-125 w-full bg-transparent pl-9 pr-4 font-medium focus:outline-none"
-              />
             </div>
           </form>
         </div>
@@ -105,15 +99,15 @@ const Header = (props: {
         <div className="2xsm:gap-7 flex items-center gap-3">
           <ul className="2xsm:gap-4 flex items-center gap-2">
             {/* <!-- Dark Mode Toggler --> */}
-            <DarkModeSwitcher />
+            {/* <DarkModeSwitcher /> */}
             {/* <!-- Dark Mode Toggler --> */}
 
             {/* <!-- Notification Menu Area --> */}
-            <DropdownNotification />
+            {/* <DropdownNotification /> */}
             {/* <!-- Notification Menu Area --> */}
 
             {/* <!-- Chat Notification Area --> */}
-            <DropdownMessage />
+            {/* <DropdownMessage /> */}
             {/* <!-- Chat Notification Area --> */}
           </ul>
 

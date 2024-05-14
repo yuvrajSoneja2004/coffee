@@ -61,7 +61,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
   return (
     <aside
       ref={sidebar}
-      className={`z-9999 w-72.5 dark:bg-boxdark bg-themeGray absolute left-0 top-0 flex h-screen flex-col overflow-y-hidden duration-300 ease-linear lg:static lg:translate-x-0 ${
+      className={`z-9999 w-72.5 dark:bg-boxdark absolute left-0 top-0 flex h-screen flex-col overflow-y-hidden bg-themeGray duration-300 ease-linear lg:static lg:translate-x-0 ${
         sidebarOpen ? "translate-x-0" : "-translate-x-full"
       }`}
     >
@@ -109,7 +109,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
               <li>
                 <Link
                   href="/dailyWorkData"
-                  className={`hover:bg-graydark dark:hover:bg-meta-4 group relative flex items-center gap-2.5 rounded-sm px-1 py-2 font-medium text-white duration-300 ease-in-out ${
+                  className={`hover:bg-graydark dark:hover:bg-meta-4 font-satoshi group relative flex items-center gap-2.5 rounded-sm px-1 py-2 font-medium text-white duration-300 ease-in-out ${
                     pathname.includes("calendar") &&
                     "bg-graydark dark:bg-meta-4"
                   }`}
@@ -136,7 +136,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
               <li>
                 <Link
                   href="/materials"
-                  className={`hover:bg-graydark dark:hover:bg-meta-4 group relative flex items-center gap-2.5 rounded-sm px-1 py-2 font-medium text-white duration-300 ease-in-out ${
+                  className={`hover:bg-graydark font-satoshi dark:hover:bg-meta-4 group relative flex items-center gap-2.5 rounded-sm px-1 py-2 font-medium text-white duration-300 ease-in-out ${
                     pathname.includes("materials") &&
                     "bg-graydark dark:bg-meta-4"
                   }`}

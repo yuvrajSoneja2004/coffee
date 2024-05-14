@@ -3,7 +3,7 @@ import { google } from "googleapis";
 
 const auth = new google.auth.GoogleAuth({
   keyFile:
-    "C:/Users/Yash/Desktop/dashboard-proto/free-nextjs-admin-dashboard/src/lib/google.json",
+    "C:/Users/Yash/Desktop/dashboard-proto/coffee-proto/src/lib/google.json",
   scopes: ["https://www.googleapis.com/auth/spreadsheets"],
 });
 
