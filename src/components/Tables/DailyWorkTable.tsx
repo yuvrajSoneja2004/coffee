@@ -43,7 +43,7 @@ function DailyWorkTable({ sheetName }: DailyWorkTableProps) {
   if (headingRows === "EMPTY") return <h1>No Info found.</h1>;
 
   return (
-    <Table className="mt-6">
+    <Table className="border-stroke px-7.5 shadow-default dark:border-strokedark dark:bg-boxdark mt-6 rounded-md border bg-white py-6">
       <TableCaption>A list of your recent invoices.</TableCaption>
       <TableHeader>
         <TableRow className="text-sm">
