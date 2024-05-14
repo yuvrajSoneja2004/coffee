@@ -8,20 +8,20 @@ import {
 } from "@/components/ui/dialog";
 import React from "react";
 import { Button } from "../ui/button";
+import { Plus } from "lucide-react";
 
 function DailyWorkDataDialogue() {
   return (
     <Dialog>
       <DialogTrigger>
-        <Button>Create</Button>
+        <Button className="flex-center flex gap-2">
+          <Plus />
+          Add Data
+        </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Are you absolutely sure?</DialogTitle>
-          <DialogDescription>
-            This action cannot be undone. This will permanently delete your
-            account and remove your data from our servers.
-          </DialogDescription>
+          <DialogDescription></DialogDescription>
         </DialogHeader>
       </DialogContent>
     </Dialog>
