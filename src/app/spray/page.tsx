@@ -1,15 +1,16 @@
 "use client";
 import DefaultLayout from "@/components/Layouts/DefaultLayout";
 import axios from "axios";
-import DailyWorkData from "@/components/DailyWorkDataComp";
 
-const CalendarPage = () => {
+import SprayData from "@/components/SparyComp";
+
+const page = () => {
   // const [headingRows, setHeadingRows] = useState([]);
   return (
     <DefaultLayout>
-      <DailyWorkData />
+      <SprayData />
     </DefaultLayout>
   );
 };
 
-export default CalendarPage;
+export default page;

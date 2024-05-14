@@ -71,8 +71,9 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
           <Image
             width={176}
             height={32}
-            src={"/images/logo/logo.svg"}
+            src={"/images/logo/logo_dark.png"}
             alt="Logo"
+            className="mt-7"
             priority
           />
         </Link>
@@ -101,21 +102,14 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
       </div>
       {/* <!-- SIDEBAR HEADER --> */}
 
-      <div className="no-scrollbar flex flex-col overflow-y-auto duration-300 ease-linear">
-        {/* <!-- Sidebar Menu --> */}
+      <div className="no-scrollbar z-[999] flex flex-col overflow-y-auto duration-300 ease-linear">
         <nav className="mt-5 px-4 py-4 lg:mt-9 lg:px-6">
-          {/* <!-- Menu Group --> */}
           <div>
             <ul className="mb-6 flex flex-col gap-1.5">
-              {/* <!-- Menu Item Dashboard --> */}
-
-              {/* <!-- Menu Item Dashboard --> */}
-
-              {/* <!-- Menu Item Calendar --> */}
               <li>
                 <Link
                   href="/dailyWorkData"
-                  className={`hover:bg-graydark dark:hover:bg-meta-4 group relative flex items-center gap-2.5 rounded-sm px-4 py-2 font-medium text-white duration-300 ease-in-out ${
+                  className={`hover:bg-graydark dark:hover:bg-meta-4 group relative flex items-center gap-2.5 rounded-sm px-1 py-2 font-medium text-white duration-300 ease-in-out ${
                     pathname.includes("calendar") &&
                     "bg-graydark dark:bg-meta-4"
                   }`}
@@ -141,9 +135,10 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
               {/* <!-- Menu Item Profile --> */}
               <li>
                 <Link
-                  href="/material"
-                  className={`hover:bg-graydark dark:hover:bg-meta-4 group relative flex items-center gap-2.5 rounded-sm px-4 py-2 font-medium text-white duration-300 ease-in-out ${
-                    pathname.includes("profile") && "bg-graydark dark:bg-meta-4"
+                  href="/materials"
+                  className={`hover:bg-graydark dark:hover:bg-meta-4 group relative flex items-center gap-2.5 rounded-sm px-1 py-2 font-medium text-white duration-300 ease-in-out ${
+                    pathname.includes("materials") &&
+                    "bg-graydark dark:bg-meta-4"
                   }`}
                 >
                   <svg
@@ -171,8 +166,8 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
               {/* <!-- Menu Item Tables --> */}
               <li>
                 <Link
-                  href="/spary"
-                  className={`hover:bg-graydark dark:hover:bg-meta-4 group relative flex items-center gap-2.5 rounded-sm px-4 py-2 font-medium text-white duration-300 ease-in-out ${
+                  href="/spray"
+                  className={`hover:bg-graydark dark:hover:bg-meta-4 group relative flex items-center gap-2.5 rounded-sm px-1 py-2 font-medium text-white duration-300 ease-in-out ${
                     pathname.includes("tables") && "bg-graydark dark:bg-meta-4"
                   }`}
                 >
@@ -201,7 +196,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                       </clipPath>
                     </defs>
                   </svg>
-                  Spary
+                  Spray
                 </Link>
               </li>
               {/* <!-- Menu Item Tables --> */}
@@ -210,7 +205,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
               <li>
                 <Link
                   href="/cash"
-                  className={`hover:bg-graydark dark:hover:bg-meta-4 group relative flex items-center gap-2.5 rounded-sm px-4 py-2 font-medium text-white duration-300 ease-in-out 
+                  className={`hover:bg-graydark dark:hover:bg-meta-4 group relative flex items-center gap-2.5 rounded-sm px-1 py-2 font-medium text-white duration-300 ease-in-out 
                   `}
                 >
                   <svg

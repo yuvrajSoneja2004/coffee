@@ -8,7 +8,7 @@ const DailyWorkData = () => {
     <div className="mx-auto max-w-7xl">
       <Breadcrumb pageName="Daily Work Data" />
       <DailyWorkDataDialogue />
-      <DailyWorkTable />
+      <DailyWorkTable sheetName={"DAILY WORK DATA"} />
     </div>
   );
 };

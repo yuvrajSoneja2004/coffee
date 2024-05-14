@@ -27,10 +27,10 @@ async function WriteToSheet(values) {
   }
 }
 
-export async function readSheet() {
+export async function readSheet(sheetName: string) {
   const sheets = google.sheets({ version: "v4", auth });
   const spreadsheetId = "1yxSl2Q_yEa-C3IjJa4MguYHd9wmnlElnJ3aaUI3MWSM";
-  const range = "Sheet1!A1:Z";
+  const range = `${!sheetName ? "Sheet1" : sheetName}!A1:Z`;
 
   try {
     const response = await sheets.spreadsheets.values.get({
@@ -38,17 +38,32 @@ export async function readSheet() {
       range,
     });
     const rows = response.data.values;
+
+    // Check if rows is empty
+    if (!rows || rows.length === 0) {
+      return "EMPTY";
+    }
+
     return rows;
   } catch (error) {
-    console.log("Error while reading the sheet data");
+    console.log("Error while reading the sheet data", error);
   }
 }
 
-export async function GET() {
+export async function GET(req: Request, res: Response) {
   try {
-    const dat = await readSheet();
-    console.log(dat);
-    return NextResponse.json(dat);
+    const url = new URL(req.url);
+    const sheetName = url.searchParams.get("sheetName")?.toString();
+    console.log(sheetName);
+
+    if (sheetName === undefined)
+      return NextResponse.json({
+        res: false,
+        msg: "Provide sheetName from client",
+      });
+    const sheetRes = await readSheet(sheetName);
+    console.log(sheetRes);
+    return NextResponse.json(sheetRes);
   } catch (error) {
     console.log(error);
   }
