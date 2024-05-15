@@ -7,6 +7,7 @@ import { useDispatch } from "react-redux";
 import { storeAuthInfo } from "@/redux/features/authSlice";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/components/ui/use-toast";
+import Image from "next/image";
 
 const SignIn: React.FC = () => {
   const [name, setName] = useState<string>("");
@@ -42,7 +43,7 @@ const SignIn: React.FC = () => {
   return (
     <div className="flex h-[100vh] w-full items-center justify-center">
       <form
-        className="h-auto w-96 rounded-md bg-white px-6 py-7"
+        className="h-auto w-96 rounded-md bg-white px-6 py-7 shadow-lg"
         onSubmit={handleSubmit}
       >
         <label htmlFor="name">Name</label>

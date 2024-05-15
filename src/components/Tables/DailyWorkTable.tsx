@@ -15,6 +15,8 @@ import NoInfoFound from "../NoInfoFound/NoInfoFound";
 import Delete from "../Actions/Delete";
 import Edit from "../Actions/Edit";
 import { useAppSelector } from "@/redux/store";
+import { useDispatch } from "react-redux";
+import { handleSlNo } from "@/redux/features/authSlice";
 
 interface DailyWorkTableProps {
   sheetName: string;
@@ -24,6 +26,7 @@ function DailyWorkTable({ sheetName }: DailyWorkTableProps) {
   const [headingRows, setHeadingRows] = useState<string[][]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { name, role } = useAppSelector((state) => state.authSlice);
+  const dispatch = useDispatch();
 
   const getData = async () => {
     setIsLoading(true);
@@ -32,6 +35,8 @@ function DailyWorkTable({ sheetName }: DailyWorkTableProps) {
         `/api/googletest?sheetName=${sheetName}`,
       );
       console.log(data);
+      dispatch(handleSlNo({ no: data?.length }));
+
       setHeadingRows(data);
     } catch (error) {
       console.log(error);

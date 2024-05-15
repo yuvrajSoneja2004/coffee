@@ -20,6 +20,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { allData, blocks, treeList, typeofWork } from "@/lib/db";
+import { useAppSelector } from "@/redux/store";
 
 function DailyWorkDataDialogue() {
   const [slNo, setSlNo] = useState("");
@@ -33,6 +34,8 @@ function DailyWorkDataDialogue() {
   const [rowFrom, setRowFrom] = useState("");
   const [rowTo, setRowTo] = useState("");
   const [treeCount, setTreeCount] = useState("");
+  const { slNoStarts } = useAppSelector((state) => state.authSlice);
+  const [open, setOpen] = useState(false);
 
   function formatDate(date) {
     const day = date.getDate().toString().padStart(2, "0");
@@ -44,10 +47,10 @@ function DailyWorkDataDialogue() {
   const handleSave = () => {
     // Construct your payload with the state values
     const payload = {
-      slNo,
+      slNo: slNoStarts,
       date: formatDate(new Date()),
       typeOfWork,
-      detailsOfWork,
+      singleDetailOfWork,
       treeListValue,
       maleLabourCount,
       femaleLabourCount,
@@ -58,7 +61,7 @@ function DailyWorkDataDialogue() {
     };
 
     // Send HTTP request to the server
-    fetch("/api/", {
+    fetch("/api/googletest", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -66,6 +69,7 @@ function DailyWorkDataDialogue() {
       body: JSON.stringify(payload),
     })
       .then((response) => {
+        setOpen(false);
         if (response.ok) {
           console.log("Data saved successfully!");
         } else {
@@ -77,9 +81,12 @@ function DailyWorkDataDialogue() {
       });
   };
   return (
-    <Dialog>
+    <Dialog open={open}>
       <DialogTrigger>
-        <Button className="flex-center flex gap-2">
+        <Button
+          className="flex-center flex gap-2"
+          onClick={() => setOpen(true)}
+        >
           <Plus />
           Add Data
         </Button>
@@ -90,11 +97,7 @@ function DailyWorkDataDialogue() {
             <div className="grid w-full grid-cols-2 gap-x-10 gap-y-4">
               <div>
                 <label htmlFor="SL.No.">SL.No</label>
-                <Input
-                  className="mt-2"
-                  value={slNo}
-                  onChange={(e) => setSlNo(e.target.value)}
-                />
+                <Input className="mt-2" value={slNoStarts} />
               </div>
               <div className="">
                 <label htmlFor="Date">Date</label>
@@ -141,7 +144,10 @@ function DailyWorkDataDialogue() {
                       return (
                         <DropdownMenuItem
                           key={index}
-                          onClick={() => setSingleDetailOfWork(detail)}
+                          onClick={() => {
+                            console.log(detail);
+                            setSingleDetailOfWork(detail);
+                          }}
                         >
                           {detail}
                         </DropdownMenuItem>
@@ -156,8 +162,9 @@ function DailyWorkDataDialogue() {
                     <label htmlFor="">TreeList</label>
                     <Input
                       className="mt-2"
-                      placeholder={treeCount}
-                      value={treeCount}
+                      placeholder={treeListValue}
+                      value={treeListValue}
+                      onChange={(e) => setTreeListValue(e.target.value)}
                     />
                   </DropdownMenuTrigger>
                   <DropdownMenuContent>
@@ -165,7 +172,7 @@ function DailyWorkDataDialogue() {
                       <DropdownMenuItem
                         key={i}
                         onClick={() => {
-                          setTreeCount(work);
+                          setTreeListValue(work);
                         }}
                       >
                         {work}
@@ -176,11 +183,20 @@ function DailyWorkDataDialogue() {
               </div>
               <div className="mt-2">
                 <label htmlFor="SL.No.">Male Labour Count</label>
-                <Input className="mt-2" type="number" />
+                <Input
+                  className="mt-2"
+                  type="number"
+                  value={maleLabourCount}
+                  onChange={(e) => setMaleLabourCount(e.target.value)}
+                />
               </div>
               <div className="mt-2">
                 <label htmlFor="SL.No.">Female Labour Count</label>
-                <Input className="mt-2" />
+                <Input
+                  className="mt-2"
+                  value={femaleLabourCount}
+                  onChange={(e) => setFemaleLabourCount(e.target.value)}
+                />
               </div>
               <div className="mt-2">
                 <DropdownMenu>
@@ -204,17 +220,29 @@ function DailyWorkDataDialogue() {
               </div>
               <div className="mt-2">
                 <label htmlFor="SL.No.">Row from</label>
-                <Input className="mt-2" />
+                <Input
+                  className="mt-2"
+                  value={rowFrom}
+                  onChange={(e) => setRowFrom(e.target.value)}
+                />
               </div>
               <div className="mt-2">
                 <label htmlFor="SL.No.">Row to</label>
-                <Input className="mt-2" />
+                <Input
+                  className="mt-2"
+                  value={rowTo}
+                  onChange={(e) => setRowTo(e.target.value)}
+                />
               </div>
               <div className="mt-2">
                 <label htmlFor="SL.No.">Tree Count</label>
-                <Input className="mt-2" />
+                <Input
+                  className="mt-2"
+                  value={treeCount}
+                  onChange={(e) => setTreeCount(e.target.value)}
+                />
               </div>
-              <Button>Save Data</Button>
+              <Button onClick={handleSave}>Save Data</Button>
             </div>
           </DialogDescription>
         </DialogHeader>
