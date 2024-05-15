@@ -11,7 +11,7 @@ import { Trash2 } from "lucide-react";
 import { Button } from "../ui/button";
 import axios from "axios";
 
-function Delete({ rowIndex }) {
+function Delete({ rowIndex, isAllowed }: any) {
   const handleDelete = async () => {
     try {
       const { data } = axios.put("/api/googletest", {
@@ -26,8 +26,11 @@ function Delete({ rowIndex }) {
   return (
     <Dialog>
       <DialogTrigger>
-        <button className="flex items-center justify-center rounded-md bg-red-500 p-1.5">
-          <span>{rowIndex + 1}</span>
+        <button
+          className="flex items-center justify-center rounded-md bg-red-500 p-1.5"
+          disabled={!isAllowed}
+          style={{ opacity: !isAllowed ? 0.5 : 1 }}
+        >
           <Trash2 size={13} color="#fff" />
         </button>
       </DialogTrigger>

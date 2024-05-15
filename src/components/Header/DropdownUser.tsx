@@ -1,9 +1,12 @@
+"use client";
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { useAppSelector } from "@/redux/store";
 
 const DropdownUser = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const { name, role } = useAppSelector((state) => state.authSlice);
 
   const trigger = useRef<any>(null);
   const dropdown = useRef<any>(null);
@@ -44,9 +47,9 @@ const DropdownUser = () => {
       >
         <span className="hidden text-right lg:block">
           <span className="block text-sm font-medium text-black dark:text-white">
-            Thomas Anree
+            {name}
           </span>
-          <span className="block text-xs">Admin</span>
+          <span className="block text-xs">{role}</span>
         </span>
 
         <span className="h-12 w-12 rounded-full">

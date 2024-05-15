@@ -9,11 +9,15 @@ import {
 } from "@/components/ui/dialog";
 import { Pencil, Trash2 } from "lucide-react";
 
-function Edit() {
+function Edit({ isAllowed }: any) {
   return (
     <Dialog>
       <DialogTrigger>
-        <button className="flex items-center justify-center rounded-md bg-green-500 p-1.5">
+        <button
+          className="flex items-center justify-center rounded-md bg-green-500 p-1.5"
+          disabled={!isAllowed}
+          style={{ opacity: !isAllowed ? 0.5 : 1 }}
+        >
           <Pencil size={13} color="#fff" />
         </button>
       </DialogTrigger>

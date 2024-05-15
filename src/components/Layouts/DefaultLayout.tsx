@@ -2,6 +2,7 @@
 import React, { useState, ReactNode } from "react";
 import Sidebar from "@/components/Sidebar";
 import Header from "@/components/Header";
+import { useAppSelector } from "@/redux/store";
 
 export default function DefaultLayout({
   children,
@@ -9,6 +10,7 @@ export default function DefaultLayout({
   children: React.ReactNode;
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
   return (
     <>
       {/* <!-- ===== Page Wrapper Start ===== --> */}

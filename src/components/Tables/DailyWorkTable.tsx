@@ -14,6 +14,7 @@ import Loader from "../common/Loader";
 import NoInfoFound from "../NoInfoFound/NoInfoFound";
 import Delete from "../Actions/Delete";
 import Edit from "../Actions/Edit";
+import { useAppSelector } from "@/redux/store";
 
 interface DailyWorkTableProps {
   sheetName: string;
@@ -22,6 +23,7 @@ interface DailyWorkTableProps {
 function DailyWorkTable({ sheetName }: DailyWorkTableProps) {
   const [headingRows, setHeadingRows] = useState<string[][]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const { name, role } = useAppSelector((state) => state.authSlice);
 
   const getData = async () => {
     setIsLoading(true);
@@ -76,8 +78,11 @@ function DailyWorkTable({ sheetName }: DailyWorkTableProps) {
                     <TableCell>{cell}</TableCell>
                     <TableCell>
                       <div className="flex items-center justify-center gap-1">
-                        <Delete rowIndex={rowIndex} />
-                        <Edit />
+                        <Delete
+                          rowIndex={rowIndex}
+                          isAllowed={role === "Admin"}
+                        />
+                        <Edit isAllowed={role === "Admin"} />
                       </div>
                     </TableCell>
                   </React.Fragment>
