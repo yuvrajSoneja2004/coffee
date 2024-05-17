@@ -91,7 +91,7 @@ function DailyWorkDataDialogue() {
           Add Data
         </Button>
       </DialogTrigger>
-      <DialogContent className="">
+      <DialogContent className="" onInteractOutside={() => setOpen(false)}>
         <DialogHeader>
           <DialogDescription className="">
             <div className="grid w-full grid-cols-2 gap-x-10 gap-y-4">

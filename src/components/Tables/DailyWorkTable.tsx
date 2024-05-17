@@ -16,7 +16,11 @@ import Delete from "../Actions/Delete";
 import Edit from "../Actions/Edit";
 import { useAppSelector } from "@/redux/store";
 import { useDispatch } from "react-redux";
-import { handleSlNo } from "@/redux/features/authSlice";
+import {
+  handleReload,
+  handleSlNo,
+  handleSlNoMaterial,
+} from "@/redux/features/authSlice";
 
 interface DailyWorkTableProps {
   sheetName: string;
@@ -25,7 +29,9 @@ interface DailyWorkTableProps {
 function DailyWorkTable({ sheetName }: DailyWorkTableProps) {
   const [headingRows, setHeadingRows] = useState<string[][]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const { name, role } = useAppSelector((state) => state.authSlice);
+  const { name, role, reloadHandler } = useAppSelector(
+    (state) => state.authSlice,
+  );
   const dispatch = useDispatch();
 
   const getData = async () => {
@@ -35,7 +41,13 @@ function DailyWorkTable({ sheetName }: DailyWorkTableProps) {
         `/api/googletest?sheetName=${sheetName}`,
       );
       console.log(data);
-      dispatch(handleSlNo({ no: data?.length }));
+      dispatch(handleReload(1));
+      if ((sheetName = "Daily Work Data")) {
+        dispatch(handleSlNo({ no: data?.length }));
+      } else if ((sheetName = "Material")) {
+        console.log("ypu this is material");
+        dispatch(handleSlNoMaterial({ no: data?.length }));
+      }
 
       setHeadingRows(data);
     } catch (error) {
@@ -47,7 +59,7 @@ function DailyWorkTable({ sheetName }: DailyWorkTableProps) {
 
   useEffect(() => {
     getData();
-  }, []);
+  }, [reloadHandler]);
 
   if (isLoading) return <Loader additionalStyles="mt-5" />;
   if (headingRows === "EMPTY") return <NoInfoFound />;

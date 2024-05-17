@@ -4,12 +4,16 @@ interface InitialState {
   name: string;
   role: string;
   slNoStarts: number;
+  slNoMaterial: number;
+  reloadHandler: number;
 }
 
 let initialState: InitialState = {
   name: "",
   role: "",
   slNoStarts: 0,
+  slNoMaterial: 0,
+  reloadHandler: 0,
 };
 
 export const auth = createSlice({
@@ -24,8 +28,16 @@ export const auth = createSlice({
       console.log(action.payload.no - 1, "action");
       state.slNoStarts = action.payload.no;
     },
+    handleSlNoMaterial(state, action) {
+      console.log(action.payload.no - 1, "action");
+      state.slNoMaterial = action.payload.no;
+    },
+    handleReload(state, action) {
+      state.reloadHandler = action.payload;
+    },
   },
 });
 
-export const { storeAuthInfo, handleSlNo } = auth.actions;
+export const { storeAuthInfo, handleSlNo, handleSlNoMaterial, handleReload } =
+  auth.actions;
 export default auth.reducer;

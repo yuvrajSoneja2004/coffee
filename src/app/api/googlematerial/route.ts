@@ -12,7 +12,7 @@ const auth = new google.auth.GoogleAuth({
 async function WriteToSheet(values) {
   const sheets = google.sheets({ version: "v4", auth });
   const spreadsheetId = "1yxSl2Q_yEa-C3IjJa4MguYHd9wmnlElnJ3aaUI3MWSM";
-  const range = "DAILY WORK DATA";
+  const range = "MATERIAL";
   const valueInputOption = "USER_ENTERED";
   const resource = { values };
 
@@ -71,53 +71,29 @@ export async function deleteRow(sheetName: string, rowIndex: number) {
   }
 }
 
-export async function GET(req: Request, res: Response) {
-  try {
-    const url = new URL(req.url);
-    const sheetName = url.searchParams.get("sheetName")?.toString();
-    if (sheetName === undefined)
-      return NextResponse.json({
-        res: false,
-        msg: "Provide sheetName from client",
-      });
-
-      console.log(path.join(__dirname , "../../"))
-    const sheetRes = await readSheet(sheetName);
-    return NextResponse.json(sheetRes);
-  } catch (error) {
-    console.log(error);
-  }
-}
-
 export async function POST(req: Request, res: Response) {
   try {
     const {
       slNo,
       date,
-      typeOfWork,
-      singleDetailOfWork,
-      treeListValue,
-      maleLabourCount,
-      femaleLabourCount,
-      block,
-      rowFrom,
-      rowTo,
-      treeCount,
+      boughtIssuedBy,
+      baseMaterial,
+      singleUnit,
+      inQty,
+      outQty,
+      remarks,
     } = await req.json();
 
     const write = await WriteToSheet([
       [
         slNo,
         date,
-        typeOfWork,
-        singleDetailOfWork,
-        treeListValue,
-        maleLabourCount,
-        femaleLabourCount,
-        block,
-        rowFrom,
-        rowTo,
-        treeCount,
+        boughtIssuedBy,
+        baseMaterial,
+        singleUnit,
+        inQty,
+        outQty,
+        remarks,
       ],
     ]);
   } catch (error) {
