@@ -5,7 +5,8 @@ import path from "path";
 
 const auth = new google.auth.GoogleAuth({
   keyFile:
-    "C:/Users/Yash/Desktop/dashboard-proto/coffee-proto/src/lib/google.json",
+    // "C:/Users/Yash/Desktop/dashboard-proto/coffee-proto/src/lib/google.json",
+    path.join(__dirname, "../../../lib/google.json"),
   scopes: ["https://www.googleapis.com/auth/spreadsheets"],
 });
 
@@ -81,7 +82,7 @@ export async function GET(req: Request, res: Response) {
         msg: "Provide sheetName from client",
       });
 
-      console.log(path.join(__dirname , "../../"))
+    console.log(path.join(__dirname, "../../../lib/google.json"));
     const sheetRes = await readSheet(sheetName);
     return NextResponse.json(sheetRes);
   } catch (error) {

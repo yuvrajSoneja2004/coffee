@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import { NextResponse } from "next/server";
+import path from "path";
 
 const userSchema = new mongoose.Schema({
   name: {
@@ -37,6 +38,8 @@ export const connectToDB = () => {
 export async function POST(req: Request, res: Response) {
   connectToDB();
   try {
+    // ../../../lib/google.json
+    console.log(__dirname);
     const { name, password } = await req.json();
     console.log(name, password);
     const dbRes = await User.findOne({ name: name, password: password });
