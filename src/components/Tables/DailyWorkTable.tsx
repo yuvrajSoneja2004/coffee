@@ -99,7 +99,11 @@ function DailyWorkTable({ sheetName }: DailyWorkTableProps) {
                           rowIndex={rowIndex}
                           isAllowed={role === "Admin"}
                         />
-                        <Edit isAllowed={role === "Admin"} />
+                        <Edit
+                          isAllowed={role === "Admin"}
+                          data={row}
+                          rowIndex={rowIndex}
+                        />
                       </div>
                     </TableCell>
                   </React.Fragment>
