@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import SidebarLinkGroup from "./SidebarLinkGroup";
-import { Banknote, Sheet, SprayCan } from "lucide-react";
+import { Banknote, Blocks, Sheet, SprayCan } from "lucide-react";
 
 interface SidebarProps {
   sidebarOpen: boolean;
@@ -110,7 +110,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
               <li>
                 <Link
                   href="/dailyWorkData"
-                  className={`hover:bg-graydark dark:hover:bg-meta-4 font-satoshi group relative flex items-center gap-2.5 rounded-sm px-1 py-2 font-medium text-white duration-300 ease-in-out ${
+                  className={`hover:bg-graydark dark:hover:bg-meta-4 group relative flex items-center gap-2.5 rounded-sm px-1 py-2 font-satoshi font-medium text-white duration-300 ease-in-out ${
                     pathname.includes("calendar") &&
                     "bg-graydark dark:bg-meta-4"
                   }`}
@@ -125,7 +125,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
               <li>
                 <Link
                   href="/materials"
-                  className={`hover:bg-graydark font-satoshi dark:hover:bg-meta-4 group relative flex items-center gap-2.5 rounded-sm px-1 py-2 font-medium text-white duration-300 ease-in-out ${
+                  className={`hover:bg-graydark dark:hover:bg-meta-4 group relative flex items-center gap-2.5 rounded-sm px-1 py-2 font-satoshi font-medium text-white duration-300 ease-in-out ${
                     pathname.includes("materials") &&
                     "bg-graydark dark:bg-meta-4"
                   }`}
@@ -175,6 +175,16 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                 >
                   <Banknote size={20} />
                   Cash
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/inventory"
+                  className={`hover:bg-graydark dark:hover:bg-meta-4 group relative flex items-center gap-2.5 rounded-sm px-1 py-2 font-medium text-white duration-300 ease-in-out 
+                  `}
+                >
+                  <Blocks size={20} />
+                  Inventory
                 </Link>
               </li>
             </ul>

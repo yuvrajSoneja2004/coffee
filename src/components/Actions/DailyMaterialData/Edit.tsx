@@ -8,9 +8,8 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import React, { useEffect, useState } from "react";
-import { Button } from "../ui/button";
+import { Button } from "@/components/ui/button";
 import { Pencil, Plus } from "lucide-react";
-import { Input } from "../ui/input";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -21,6 +20,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { allData, blocks, treeList, typeofWork } from "@/lib/db";
 import { useAppSelector } from "@/redux/store";
+import { Input } from "@/components/ui/input";
 
 function Edit({ isAllowed, data, rowIndex, sheetName }: any) {
   const [

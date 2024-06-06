@@ -13,13 +13,13 @@ import { Button } from "../ui/button";
 import axios from "axios";
 import { useToast } from "../ui/use-toast";
 
-function Delete({ rowIndex, isAllowed }: any) {
+function Delete({ rowIndex, isAllowed, sheetName }: any) {
   const { toast } = useToast();
   const [open, setIsOpen] = useState(false);
   const handleDelete = async () => {
     try {
       const { data } = axios.put("/api/googletest", {
-        sheetName: "DAILY WORK DATA",
+        sheetName: sheetName,
         rowIndex: rowIndex + 2,
       });
 

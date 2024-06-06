@@ -13,7 +13,6 @@ import axios from "axios";
 import Loader from "../common/Loader";
 import NoInfoFound from "../NoInfoFound/NoInfoFound";
 import Delete from "../Actions/Delete";
-import Edit from "../Actions/Edit";
 import { useAppSelector } from "@/redux/store";
 import { useDispatch } from "react-redux";
 import {
@@ -21,6 +20,7 @@ import {
   handleSlNo,
   handleSlNoMaterial,
 } from "@/redux/features/authSlice";
+import Edit from "../Actions/DailyMaterialData/Edit";
 
 interface DailyWorkTableProps {
   sheetName: string;
@@ -75,8 +75,10 @@ function DailyWorkTable({ sheetName }: DailyWorkTableProps) {
               {heading}
             </TableHead>
           ))}
-          {sheetName === "DAILY WORK DATA" && (
-            <TableHead className="text-[14px] font-bold">Action</TableHead>
+          {sheetName && (
+            <TableHead className="text-[14px] font-bold" align="center">
+              Action
+            </TableHead>
           )}
         </TableRow>
       </TableHeader>
@@ -85,10 +87,7 @@ function DailyWorkTable({ sheetName }: DailyWorkTableProps) {
         {headingRows.slice(1).map((row, rowIndex) => (
           <TableRow key={rowIndex}>
             {row.map((cell, cellIndex) => {
-              if (
-                sheetName === "DAILY WORK DATA" &&
-                cellIndex === row.length - 1
-              ) {
+              if (sheetName && cellIndex === row.length - 1) {
                 // If it's the "Action" column, render a button
                 return (
                   <React.Fragment key={cellIndex}>
@@ -98,12 +97,30 @@ function DailyWorkTable({ sheetName }: DailyWorkTableProps) {
                         <Delete
                           rowIndex={rowIndex}
                           isAllowed={role === "Admin"}
+                          sheetName={sheetName}
                         />
-                        <Edit
-                          isAllowed={role === "Admin"}
-                          data={row}
-                          rowIndex={rowIndex}
-                        />
+                        {sheetName === "DAILY WORK DATA" ? (
+                          <Edit
+                            isAllowed={role === "Admin"}
+                            data={row}
+                            rowIndex={rowIndex}
+                            sheetName={sheetName}
+                          />
+                        ) : sheetName === "MATERIALS" ? (
+                          <Edit
+                            isAllowed={role === "Admin"}
+                            data={row}
+                            rowIndex={rowIndex}
+                            sheetName={sheetName}
+                          />
+                        ) : (
+                          <Edit
+                            isAllowed={role === "Admin"}
+                            data={row}
+                            rowIndex={rowIndex}
+                            sheetName={sheetName}
+                          />
+                        )}
                       </div>
                     </TableCell>
                   </React.Fragment>
