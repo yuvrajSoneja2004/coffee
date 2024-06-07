@@ -5,7 +5,13 @@ import { usePathname } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import SidebarLinkGroup from "./SidebarLinkGroup";
-import { Banknote, Blocks, Sheet, SprayCan } from "lucide-react";
+import {
+  Banknote,
+  Blocks,
+  Sheet,
+  SprayCan,
+  SquareGanttChart,
+} from "lucide-react";
 
 interface SidebarProps {
   sidebarOpen: boolean;
@@ -185,6 +191,16 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                 >
                   <Blocks size={20} />
                   Inventory
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/manageLists"
+                  className={`hover:bg-graydark dark:hover:bg-meta-4 group relative flex items-center gap-2.5 rounded-sm px-1 py-2 font-medium text-white duration-300 ease-in-out 
+                  `}
+                >
+                  <SquareGanttChart size={20} />
+                  Manage Lists & Options
                 </Link>
               </li>
             </ul>
