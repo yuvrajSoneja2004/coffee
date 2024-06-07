@@ -24,18 +24,16 @@ import { useAppSelector } from "@/redux/store";
 import { useDispatch } from "react-redux";
 import { handleReload } from "@/redux/features/authSlice";
 
-function SprayDialogue() {
-  const [slNo, setSlNo] = useState("");
-  const [boughtIssuedBy, setBoughtIssuedBy] = useState("");
-  const [solutions, setSolutions] = useState("");
-  const [singleUnit, setSingleUnit] = useState("");
-  const [inQty, setInQty] = useState("");
-  const [outQty, setOutQty] = useState("");
-  const [remarks, setRemarks] = useState("");
-
-  const { slNoMaterial, reloadHandler } = useAppSelector(
-    (state) => state.authSlice,
-  );
+function MeteorologicalDialogue() {
+  const [rainfall, setRainfall] = useState();
+  const [humidity, setHumidity] = useState({
+    min: "",
+    max: "",
+  });
+  const [temperature, setTemperature] = useState({
+    min: "",
+    max: "",
+  });
   const dispatch = useDispatch();
   const [open, setOpen] = useState(false);
 
@@ -48,18 +46,16 @@ function SprayDialogue() {
   const handleSave = () => {
     // Construct your payload with the state values
     const payload = {
-      slNo: slNoMaterial,
       date: formatDate(new Date()),
-      boughtIssuedBy,
-      solutions,
-      singleUnit,
-      inQty,
-      outQty,
-      remarks,
+      rainfall,
+      humidityMin: humidity.min,
+      humidityMax: humidity.max,
+      temperatureMin: temperature.min,
+      temperatureMax: temperature.max,
     };
 
     // Send HTTP request to the server
-    fetch("/api/googleSpray", {
+    fetch("/api/addMeteorological", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -68,8 +64,6 @@ function SprayDialogue() {
     })
       .then((response) => {
         setOpen(false);
-        dispatch(handleReload(1));
-
         if (response.ok) {
           console.log("Data saved successfully!");
         } else {
@@ -95,83 +89,76 @@ function SprayDialogue() {
       <DialogContent className="" onInteractOutside={() => setOpen(false)}>
         <DialogHeader>
           <DialogDescription className="">
-            <div className="grid w-full grid-cols-2 gap-x-10 gap-y-4">
-              <div>
-                <label htmlFor="SL.No.">SL.No</label>
-                <Input className="mt-2" value={slNoMaterial} />
-              </div>
+            <div className="">
               <div className="">
                 <label htmlFor="Date">Date</label>
                 <Input className="mt-2" value={formatDate(new Date())} />
               </div>
-              {/* Dropdown  */}
+
               <div className="mt-2">
-                <label htmlFor="SL.No.">Bought/ Issued By</label>
+                <label htmlFor="SL.No.">Rainfall (in mm)</label>
                 <Input
                   className="mt-2"
-                  type="text"
-                  value={boughtIssuedBy}
-                  onChange={(e) => setBoughtIssuedBy(e.target.value)}
+                  value={rainfall}
+                  type="number"
+                  onChange={(e) => setRainfall(e.target.value)}
                 />
               </div>
-              <div className="mt-2">
-                <label htmlFor="SL.No.">Solutions</label>
-                <Input
-                  className="mt-2"
-                  type="text"
-                  value={solutions}
-                  onChange={(e) => setSolutions(e.target.value)}
-                />
-              </div>
-              <div className="mt-2">
-                <DropdownMenu>
-                  <DropdownMenuTrigger className="flex w-full flex-col items-start">
-                    <label htmlFor="">Unit</label>
+              {/* Humidity  */}
+              <div className="my-2 mb-4">
+                <h3 className="mb-3">Humidity</h3>
+                <div className="flex w-full justify-between">
+                  <div>
+                    <label htmlFor="">Min</label>
                     <Input
                       className="mt-2"
-                      placeholder={singleUnit}
-                      value={setSingleUnit}
-                      onChange={(e) => setTreeListValue(e.target.value)}
+                      value={humidity.min}
+                      type="number"
+                      onChange={(e) =>
+                        setHumidity({ ...humidity, min: e.target.value })
+                      }
                     />
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent>
-                    {["GMS", "KG"].map((work, i) => (
-                      <DropdownMenuItem
-                        key={i}
-                        onClick={() => {
-                          setSingleUnit(work);
-                        }}
-                      >
-                        {work}
-                      </DropdownMenuItem>
-                    ))}
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                  </div>
+                  <div>
+                    <label htmlFor="">Max</label>
+                    <Input
+                      className="mt-2"
+                      value={humidity.max}
+                      type="number"
+                      onChange={(e) =>
+                        setHumidity({ ...humidity, max: e.target.value })
+                      }
+                    />
+                  </div>
+                </div>
               </div>
-              <div className="mt-2">
-                <label htmlFor="SL.No.">IN Qty</label>
-                <Input
-                  className="mt-2"
-                  type="text"
-                  value={inQty}
-                  onChange={(e) => setInQty(e.target.value)}
-                />
-              </div>
-              <div className="mt-2">
-                <label htmlFor="SL.No.">OUT Qty</label>
-                <Input
-                  className="mt-2"
-                  value={outQty}
-                  onChange={(e) => setOutQty(e.target.value)}
-                />
-              </div>
-              <div className="mt-2">
-                <label htmlFor="SL.No.">Remarks</label>
-                <Input
-                  className="mt-2"
-                  value={remarks}
-                  onChange={(e) => setRemarks(e.target.value)}
-                />
+              {/* Temperature  */}
+              <div className="my-2 mb-4">
+                <h3 className="mb-3">Temperature</h3>
+                <div className="flex w-full justify-between">
+                  <div>
+                    <label htmlFor="">Min</label>
+                    <Input
+                      className="mt-2"
+                      value={temperature.min}
+                      type="number"
+                      onChange={(e) =>
+                        setTemperature({ ...temperature, min: e.target.value })
+                      }
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="">Max</label>
+                    <Input
+                      className="mt-2"
+                      value={temperature.max}
+                      type="number"
+                      onChange={(e) =>
+                        setTemperature({ ...temperature, max: e.target.value })
+                      }
+                    />
+                  </div>
+                </div>
               </div>
 
               <Button onClick={handleSave}>Save Data</Button>
@@ -183,4 +170,4 @@ function SprayDialogue() {
   );
 }
 
-export default SprayDialogue;
+export default MeteorologicalDialogue;

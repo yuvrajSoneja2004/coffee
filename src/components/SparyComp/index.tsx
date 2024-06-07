@@ -1,16 +1,15 @@
 import Breadcrumb from "../Breadcrumbs/Breadcrumb";
-import DailyWorkDataDialogue from "../Dialogues/DailyWorkDataDialogue";
-import SprayDialogue from "../Dialogues/SprayDialogue";
 import DailyWorkTable from "../Tables/DailyWorkTable";
+import MeteorologicalDialogue from "../Dialogues/SprayDialogue";
 
-const SprayData = () => {
+const MeteorologicalData = () => {
   return (
     <div className="mx-auto max-w-7xl">
-      <Breadcrumb pageName="Spray" />
-      <SprayDialogue />
-      <DailyWorkTable sheetName={"SPRAY"} />
+      <Breadcrumb pageName="Meteorological" />
+      <MeteorologicalDialogue />
+      <DailyWorkTable sheetName={"METEOROLOGICAL"} />
     </div>
   );
 };
 
-export default SprayData;
+export default MeteorologicalData;

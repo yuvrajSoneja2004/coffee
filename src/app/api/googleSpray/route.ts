@@ -4,9 +4,7 @@ import { google } from "googleapis";
 import path from "path";
 
 const auth = new google.auth.GoogleAuth({
-  // keyFile:
-  // "C:/Users/Yash/Desktop/dashboard-proto/coffee-proto/src/lib/google.json",
-  // path.join(__dirname, "../../../lib/google.json"),
+
   credentials: {
     type: "service_account",
     project_id: "coffee-423310",
