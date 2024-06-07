@@ -4,7 +4,6 @@ import {
   DialogContent,
   DialogDescription,
   DialogHeader,
-  DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
 import React, { useEffect, useState } from "react";
@@ -15,21 +14,18 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { allData, blocks, treeList, typeofWork } from "@/lib/db";
-import { useAppSelector } from "@/redux/store";
-import axios from "axios";
 
 interface Props {
+  sheetName: string;
   type: string;
   listIndex: number;
   columnToWrite: string;
   isUnitRequired?: boolean;
 }
 function ManageDialogue({
+  sheetName,
   type,
   listIndex,
   columnToWrite,
@@ -50,6 +46,7 @@ function ManageDialogue({
   const handleSave = () => {
     // Construct your payload with the state values
     const payload = {
+      sheetName,
       name,
       currentUnit,
       listIndex,

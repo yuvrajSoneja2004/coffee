@@ -3,15 +3,17 @@ import { google } from "googleapis";
 import { NextResponse } from "next/server";
 
 async function WriteToSpecificColumn(
+  sheetName: string,
   columnToWrite: string,
   values: any,
   colLength: number,
 ) {
   const sheets = google.sheets({ version: "v4", auth });
   const spreadsheetId = "1yxSl2Q_yEa-C3IjJa4MguYHd9wmnlElnJ3aaUI3MWSM";
-  const range = `LIST AND OPTIONS!${columnToWrite}${colLength + 2}`; // Appending to the entire column B
+  const range = `${sheetName}!${columnToWrite}${colLength + 2}`; // Appending to the entire column B
+  // const range = `LIST AND OPTIONS!${columnToWrite}${colLength + 2}`; // Appending to the entire column B
   const valueInputOption = "USER_ENTERED";
-  const resource = { values: values.map((value) => [value]) };
+  const resource = { values: values.map((value: any) => [value]) };
 
   try {
     const res = await sheets.spreadsheets.values.append({
@@ -28,10 +30,11 @@ async function WriteToSpecificColumn(
 }
 export async function POST(req: Request, res: Response) {
   try {
-    const { name, currentUnit, listIndex, columnToWrite } = await req.json();
+    const { sheetName, name, currentUnit, listIndex, columnToWrite } =
+      await req.json();
     const sheets = google.sheets({ version: "v4", auth });
     const spreadsheetId = "1yxSl2Q_yEa-C3IjJa4MguYHd9wmnlElnJ3aaUI3MWSM";
-    const range = `LIST AND OPTIONS`;
+    const range = `${sheetName}`;
     const response = await sheets.spreadsheets.values.get({
       spreadsheetId,
       range,
@@ -57,6 +60,7 @@ export async function POST(req: Request, res: Response) {
       });
     }
     const writeRes = await WriteToSpecificColumn(
+      sheetName,
       columnToWrite,
       [`${name}[${currentUnit}]`],
       columnsLen as number,

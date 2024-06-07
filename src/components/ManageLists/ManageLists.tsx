@@ -75,6 +75,7 @@ function ManageLists() {
               <TableHead className="w-[90%] font-bold">BaseMaterial</TableHead>
               <TableHead className="font-bold">
                 <ManageDialogue
+                  sheetName="LIST AND OPTIONS"
                   type="BaseMaterial"
                   listIndex={1}
                   columnToWrite="B"
@@ -103,6 +104,7 @@ function ManageLists() {
               <TableHead className="w-[90%] font-bold">Soluctions</TableHead>
               <TableHead className="font-bold">
                 <ManageDialogue
+                  sheetName="LIST AND OPTIONS"
                   type="Soluctions"
                   listIndex={2}
                   columnToWrite="C"
@@ -130,7 +132,12 @@ function ManageLists() {
             <TableRow>
               <TableHead className="w-[90%] font-bold">Tools</TableHead>
               <TableHead className="font-bold">
-                <ManageDialogue type="Tools" listIndex={3} columnToWrite="D" />
+                <ManageDialogue
+                  sheetName="LIST AND OPTIONS"
+                  type="Tools"
+                  listIndex={3}
+                  columnToWrite="D"
+                />
               </TableHead>
             </TableRow>
           </TableHeader>
@@ -155,6 +162,7 @@ function ManageLists() {
               <TableHead className="w-[90%] font-bold">Consumables</TableHead>
               <TableHead className="font-bold">
                 <ManageDialogue
+                  sheetName="LIST AND OPTIONS"
                   type="Consumables"
                   listIndex={4}
                   columnToWrite="E"

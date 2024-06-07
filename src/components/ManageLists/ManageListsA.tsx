@@ -55,6 +55,7 @@ function ManageListsA() {
               <TableHead className="w-[90%] font-bold">Nursery</TableHead>
               <TableHead className="font-bold">
                 <ManageDialogue
+                  sheetName="LIST AND OPTIONS A"
                   type="Nursery"
                   listIndex={2}
                   columnToWrite="B"
@@ -82,7 +83,8 @@ function ManageListsA() {
               <TableHead className="w-[90%] font-bold">Field</TableHead>
               <TableHead className="font-bold">
                 <ManageDialogue
-                  type="BaseMaterial"
+                  sheetName="LIST AND OPTIONS A"
+                  type="Field"
                   listIndex={1}
                   columnToWrite="B"
                 />
@@ -103,14 +105,17 @@ function ManageListsA() {
               ))}
           </TableBody>
         </Table>
-        {/* Soluctions */}
+        {/* Tree Management */}
         <Table className="bg-white">
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[90%] font-bold">Soluctions</TableHead>
+              <TableHead className="w-[90%] font-bold">
+                Tree Management
+              </TableHead>
               <TableHead className="font-bold">
                 <ManageDialogue
-                  type="Soluctions"
+                  sheetName="LIST AND OPTIONS A"
+                  type="Tree Management"
                   listIndex={2}
                   columnToWrite="C"
                 />
@@ -131,13 +136,18 @@ function ManageListsA() {
               ))}
           </TableBody>
         </Table>
-        {/* Tools */}
+        {/* Processing */}
         <Table className="bg-white">
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[90%] font-bold">Tools</TableHead>
+              <TableHead className="w-[90%] font-bold">Processing</TableHead>
               <TableHead className="font-bold">
-                <ManageDialogue type="Tools" listIndex={3} columnToWrite="D" />
+                <ManageDialogue
+                  sheetName="LIST AND OPTIONS A"
+                  type="Processing"
+                  listIndex={3}
+                  columnToWrite="D"
+                />
               </TableHead>
             </TableRow>
           </TableHeader>
@@ -155,14 +165,15 @@ function ManageListsA() {
               ))}
           </TableBody>
         </Table>
-        {/* Consumables */}
+        {/* Misc */}
         <Table className="bg-white">
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[90%] font-bold">Consumables</TableHead>
+              <TableHead className="w-[90%] font-bold">Misc</TableHead>
               <TableHead className="font-bold">
                 <ManageDialogue
-                  type="Consumables"
+                  sheetName="LIST AND OPTIONS A"
+                  type="Misc"
                   listIndex={4}
                   columnToWrite="E"
                 />
@@ -173,6 +184,64 @@ function ManageListsA() {
             {data
               ?.slice(1)
               ?.map((subArray) => subArray[4])
+              .filter((item) => item !== "")
+              .map((item, index) => (
+                <TableRow key={index}>
+                  <TableCell className="font-medium">
+                    {removeBracketsAndContent(item)}
+                  </TableCell>
+                </TableRow>
+              ))}
+          </TableBody>
+        </Table>
+        {/* TreeList */}
+        <Table className="bg-white">
+          <TableHeader>
+            <TableRow>
+              <TableHead className="w-[90%] font-bold">TreeList</TableHead>
+              <TableHead className="font-bold">
+                <ManageDialogue
+                  sheetName="LIST AND OPTIONS A"
+                  type="TreeList"
+                  listIndex={5}
+                  columnToWrite="F"
+                />
+              </TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {data
+              ?.slice(1)
+              ?.map((subArray) => subArray[5])
+              .filter((item) => item !== "")
+              .map((item, index) => (
+                <TableRow key={index}>
+                  <TableCell className="font-medium">
+                    {removeBracketsAndContent(item)}
+                  </TableCell>
+                </TableRow>
+              ))}
+          </TableBody>
+        </Table>
+        {/* Blocks */}
+        <Table className="bg-white">
+          <TableHeader>
+            <TableRow>
+              <TableHead className="w-[90%] font-bold">Blocks</TableHead>
+              <TableHead className="font-bold">
+                <ManageDialogue
+                  sheetName="LIST AND OPTIONS A"
+                  type="Blocks"
+                  listIndex={6}
+                  columnToWrite="G"
+                />
+              </TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {data
+              ?.slice(1)
+              ?.map((subArray) => subArray[6])
               .filter((item) => item !== "")
               .map((item, index) => (
                 <TableRow key={index}>
