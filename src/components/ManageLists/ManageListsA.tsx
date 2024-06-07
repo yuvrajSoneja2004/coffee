@@ -15,13 +15,13 @@ import { Button } from "../ui/button";
 import { Plus } from "lucide-react";
 import ManageDialogue from "../Dialogues/ManageListsDialogue";
 
-function ManageLists() {
+function ManageListsA() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [data, setData] = useState([]);
   const getData = async () => {
     setIsLoading(true);
     try {
-      const { data } = await axios.get(`/api/manageLists`);
+      const { data } = await axios.get(`/api/manageListsA`);
       console.log(data);
       setData(data);
     } catch (error) {
@@ -48,12 +48,19 @@ function ManageLists() {
     <div className="-z-50 mx-auto max-w-7xl">
       {/* tables  */}
       <div className="-z-50 grid grid-cols-3 gap-3">
-        {/* Material */}
+        {/* Nursery */}
         <Table className="-z-30 bg-white">
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[90%] font-bold">Material</TableHead>
-              <TableHead className="font-bold"></TableHead>
+              <TableHead className="w-[90%] font-bold">Nursery</TableHead>
+              <TableHead className="font-bold">
+                <ManageDialogue
+                  type="Nursery"
+                  listIndex={2}
+                  columnToWrite="B"
+                  isUnitRequired={false}
+                />
+              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -68,11 +75,11 @@ function ManageLists() {
               ))}
           </TableBody>
         </Table>
-        {/* BaseMaterial */}
+        {/* Field */}
         <Table className="bg-white">
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[90%] font-bold">BaseMaterial</TableHead>
+              <TableHead className="w-[90%] font-bold">Field</TableHead>
               <TableHead className="font-bold">
                 <ManageDialogue
                   type="BaseMaterial"
@@ -181,4 +188,4 @@ function ManageLists() {
   );
 }
 
-export default ManageLists;
+export default ManageListsA;

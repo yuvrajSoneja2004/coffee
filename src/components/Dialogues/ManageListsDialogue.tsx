@@ -27,8 +27,14 @@ interface Props {
   type: string;
   listIndex: number;
   columnToWrite: string;
+  isUnitRequired?: boolean;
 }
-function ManageDialogue({ type, listIndex, columnToWrite }: Props) {
+function ManageDialogue({
+  type,
+  listIndex,
+  columnToWrite,
+  isUnitRequired = true,
+}: Props) {
   const [name, setName] = useState<string>("");
   const [unit, setUnit] = useState(["GMS", "KG", "LTR", "MT"]);
   const [currentUnit, setCurrentUnit] = useState<string>(unit[0]);
@@ -105,30 +111,32 @@ function ManageDialogue({ type, listIndex, columnToWrite }: Props) {
                 />
               </div>
               {/* UNIT  */}
-              <div className="mt-2">
-                <DropdownMenu>
-                  <DropdownMenuTrigger className="flex w-full flex-col items-start">
-                    <label>Unit</label>
-                    <Input
-                      className="mt-2"
-                      placeholder={currentUnit}
-                      value={currentUnit}
-                    />
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent>
-                    {unit.map((un, index) => {
-                      return (
-                        <DropdownMenuItem
-                          key={index}
-                          onClick={() => setCurrentUnit(un)}
-                        >
-                          {un}
-                        </DropdownMenuItem>
-                      );
-                    })}
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
+              {isUnitRequired && (
+                <div className="mt-2">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger className="flex w-full flex-col items-start">
+                      <label>Unit</label>
+                      <Input
+                        className="mt-2"
+                        placeholder={currentUnit}
+                        value={currentUnit}
+                      />
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent>
+                      {unit.map((un, index) => {
+                        return (
+                          <DropdownMenuItem
+                            key={index}
+                            onClick={() => setCurrentUnit(un)}
+                          >
+                            {un}
+                          </DropdownMenuItem>
+                        );
+                      })}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              )}
 
               <Button onClick={handleSave}>Save Data</Button>
             </div>

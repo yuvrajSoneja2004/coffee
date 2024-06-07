@@ -7,7 +7,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Button } from "../ui/button";
 import { Plus } from "lucide-react";
 import { Input } from "../ui/input";
@@ -80,6 +80,8 @@ function DailyWorkDataDialogue() {
         console.error("Error saving data:", error);
       });
   };
+
+  useEffect(() => {}, []);
   return (
     <Dialog open={open}>
       <DialogTrigger>
@@ -99,7 +101,7 @@ function DailyWorkDataDialogue() {
                 <label htmlFor="SL.No.">SL.No</label>
                 <Input className="mt-2" value={slNoStarts} />
               </div>
-              <div className="">
+              <div>
                 <label htmlFor="Date">Date</label>
                 <Input className="mt-2" value={formatDate(new Date())} />
               </div>
