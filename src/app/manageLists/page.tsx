@@ -10,7 +10,7 @@ function page() {
       <Breadcrumb pageName="Manage Lists & Options" />
       <h1 className="mb-5 text-3xl">List #1</h1>
       <ManageListsA />
-      <h1 className="mb-5 text-3xl">List #2</h1>
+      <h1 className="my-5 text-3xl">List #2</h1>
       <ManageLists />
     </DefaultLayout>
   );

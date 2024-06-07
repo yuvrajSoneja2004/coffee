@@ -35,6 +35,13 @@ function ManageListsA() {
     getData();
   }, []);
 
+  console.log(
+    data
+      ?.slice(1)
+      ?.map((subArray) => subArray[5])
+      .filter((item) => item !== ""),
+    "soriye",
+  );
   // Utility functions to extract data using regex
   const extractUnit = (str: string) => {
     const match = str.match(/\[(.*?)\]/);
@@ -68,10 +75,12 @@ function ManageListsA() {
             {data
               ?.slice(1)
               ?.map((subArray) => subArray[0])
-              .filter((item) => item !== "")
+              .filter((item) => item !== "" && item !== undefined)
               .map((item, index) => (
                 <TableRow key={index}>
-                  <TableCell className="font-medium">{item}</TableCell>
+                  <TableCell className="font-medium">
+                    {removeBracketsAndContent(item)}
+                  </TableCell>
                 </TableRow>
               ))}
           </TableBody>
@@ -87,6 +96,7 @@ function ManageListsA() {
                   type="Field"
                   listIndex={1}
                   columnToWrite="B"
+                  isUnitRequired={false}
                 />
               </TableHead>
             </TableRow>
@@ -95,7 +105,7 @@ function ManageListsA() {
             {data
               ?.slice(1)
               ?.map((subArray) => subArray[1])
-              .filter((item) => item !== "")
+              .filter((item) => item !== "" && item !== undefined)
               .map((item, index) => (
                 <TableRow key={index}>
                   <TableCell className="font-medium">
@@ -118,6 +128,7 @@ function ManageListsA() {
                   type="Tree Management"
                   listIndex={2}
                   columnToWrite="C"
+                  isUnitRequired={false}
                 />
               </TableHead>
             </TableRow>
@@ -126,7 +137,7 @@ function ManageListsA() {
             {data
               ?.slice(1)
               ?.map((subArray) => subArray[2])
-              .filter((item) => item !== "")
+              .filter((item) => item !== "" && item !== undefined)
               .map((item, index) => (
                 <TableRow key={index}>
                   <TableCell className="font-medium">
@@ -147,6 +158,7 @@ function ManageListsA() {
                   type="Processing"
                   listIndex={3}
                   columnToWrite="D"
+                  isUnitRequired={false}
                 />
               </TableHead>
             </TableRow>
@@ -155,7 +167,7 @@ function ManageListsA() {
             {data
               ?.slice(1)
               ?.map((subArray) => subArray[3])
-              .filter((item) => item !== "")
+              .filter((item) => item !== "" && item !== undefined)
               .map((item, index) => (
                 <TableRow key={index}>
                   <TableCell className="font-medium">
@@ -176,6 +188,7 @@ function ManageListsA() {
                   type="Misc"
                   listIndex={4}
                   columnToWrite="E"
+                  isUnitRequired={false}
                 />
               </TableHead>
             </TableRow>
@@ -184,7 +197,7 @@ function ManageListsA() {
             {data
               ?.slice(1)
               ?.map((subArray) => subArray[4])
-              .filter((item) => item !== "")
+              .filter((item) => item !== "" && item !== undefined)
               .map((item, index) => (
                 <TableRow key={index}>
                   <TableCell className="font-medium">
@@ -205,6 +218,7 @@ function ManageListsA() {
                   type="TreeList"
                   listIndex={5}
                   columnToWrite="F"
+                  isUnitRequired={false}
                 />
               </TableHead>
             </TableRow>
@@ -213,7 +227,7 @@ function ManageListsA() {
             {data
               ?.slice(1)
               ?.map((subArray) => subArray[5])
-              .filter((item) => item !== "")
+              .filter((item) => item !== "" && item !== undefined)
               .map((item, index) => (
                 <TableRow key={index}>
                   <TableCell className="font-medium">
@@ -234,6 +248,7 @@ function ManageListsA() {
                   type="Blocks"
                   listIndex={6}
                   columnToWrite="G"
+                  isUnitRequired={false}
                 />
               </TableHead>
             </TableRow>
@@ -242,7 +257,7 @@ function ManageListsA() {
             {data
               ?.slice(1)
               ?.map((subArray) => subArray[6])
-              .filter((item) => item !== "")
+              .filter((item) => item !== "" && item !== undefined)
               .map((item, index) => (
                 <TableRow key={index}>
                   <TableCell className="font-medium">
