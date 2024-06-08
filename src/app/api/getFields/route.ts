@@ -42,3 +42,4 @@ export async function GET(req: Request, res: Response) {
     console.log(error);
   }
 }
+export const dynamic = "force-dynamic";
