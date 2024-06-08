@@ -19,14 +19,14 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { allData, blocks, treeList, typeofWork } from "@/lib/db";
 import { useAppSelector } from "@/redux/store";
 import axios from "axios";
 
 function DailyWorkDataDialogue() {
-  const [allInputs, setAllInputs] = useState([]);
-  const [typeOfWork, setTypeOfWork] = useState([]);
-  const [detailsOfWork, setDetailsOfWork] = useState(allData[0]);
+  const [material, setMaterial] = useState<string>("");
+  const [materialList, setMaterialList] = useState([]);
+
+  const [materialTypeIndex, setMaterialTypeIndex] = useState<number>(0);
   const [singleDetailOfWork, setSingleDetailOfWork] = useState("");
   const [treeListValue, setTreeListValue] = useState("");
   const [maleLabourCount, setMaleLabourCount] = useState("");
@@ -50,7 +50,7 @@ function DailyWorkDataDialogue() {
     const payload = {
       slNo: slNoStarts,
       date: formatDate(new Date()),
-      typeOfWork,
+      material,
       singleDetailOfWork,
       treeListValue,
       maleLabourCount,
@@ -89,7 +89,7 @@ function DailyWorkDataDialogue() {
           `/api/getFields?sheetName=LIST AND OPTIONS A`,
         );
         // Extracting all materials list from res
-        setAllInputs(data);
+        setMaterialList(data);
         console.log(data);
         // console.log("Inventory res", items);
       } catch (error) {
@@ -98,6 +98,7 @@ function DailyWorkDataDialogue() {
     };
     getFieldsData();
   }, []);
+
   return (
     <Dialog open={open}>
       <DialogTrigger>
@@ -128,15 +129,16 @@ function DailyWorkDataDialogue() {
                     <label htmlFor="">Type of Work</label>
                     <Input
                       className="mt-2"
-                      value={typeOfWork}
-                      placeholder={typeOfWork}
+                      value={material}
+                      placeholder={material}
+                      readOnly
                     />
                   </DropdownMenuTrigger>
                   <DropdownMenuContent>
-                    {allData
+                    {materialList
                       ?.slice(1)
-                      ?.map((subArray) => subArray[2])
-                      .filter((item) => item !== "")
+                      ?.map((subArray) => subArray[0])
+                      .filter((item) => item !== "" && item !== undefined)
                       .map((work, index) => (
                         <DropdownMenuItem
                           key={index}
@@ -157,24 +159,26 @@ function DailyWorkDataDialogue() {
                     <label htmlFor="">Details of work done</label>
                     <Input
                       className="mt-2"
-                      placeholder={singleDetailOfWork}
+                      placeholder="Select Details of Work Done"
                       value={singleDetailOfWork}
+                      readOnly
                     />
                   </DropdownMenuTrigger>
                   <DropdownMenuContent>
-                    {detailsOfWork.map((detail, index) => {
-                      return (
+                    {materialList
+                      ?.slice(1)
+                      ?.map((subArray) => subArray[materialTypeIndex])
+                      .filter((item) => item !== "" && item !== undefined)
+                      .map((work, index) => (
                         <DropdownMenuItem
                           key={index}
                           onClick={() => {
-                            console.log(detail);
-                            setSingleDetailOfWork(detail);
+                            setSingleDetailOfWork(work);
                           }}
                         >
-                          {detail}
+                          {work}
                         </DropdownMenuItem>
-                      );
-                    })}
+                      ))}
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
@@ -184,22 +188,26 @@ function DailyWorkDataDialogue() {
                     <label htmlFor="">TreeList</label>
                     <Input
                       className="mt-2"
-                      placeholder={treeListValue}
+                      placeholder="Select Tree List"
                       value={treeListValue}
-                      onChange={(e) => setTreeListValue(e.target.value)}
+                      readOnly
                     />
                   </DropdownMenuTrigger>
                   <DropdownMenuContent>
-                    {treeList.map((work, i) => (
-                      <DropdownMenuItem
-                        key={i}
-                        onClick={() => {
-                          setTreeListValue(work);
-                        }}
-                      >
-                        {work}
-                      </DropdownMenuItem>
-                    ))}
+                    {materialList
+                      ?.slice(1)
+                      ?.map((subArray) => subArray[6])
+                      .filter((item) => item !== "" && item !== undefined)
+                      .map((work, index) => (
+                        <DropdownMenuItem
+                          key={index}
+                          onClick={() => {
+                            setTreeListValue(work);
+                          }}
+                        >
+                          {work}
+                        </DropdownMenuItem>
+                      ))}
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
@@ -216,6 +224,7 @@ function DailyWorkDataDialogue() {
                 <label htmlFor="SL.No.">Female Labour Count</label>
                 <Input
                   className="mt-2"
+                  type="number"
                   value={femaleLabourCount}
                   onChange={(e) => setFemaleLabourCount(e.target.value)}
                 />
@@ -224,19 +233,28 @@ function DailyWorkDataDialogue() {
                 <DropdownMenu>
                   <DropdownMenuTrigger className="flex w-full flex-col items-start">
                     <label htmlFor="">Block</label>
-                    <Input className="mt-2" value={block} placeholder={block} />
+                    <Input
+                      className="mt-2"
+                      value={block}
+                      placeholder="Select Block"
+                      readOnly
+                    />
                   </DropdownMenuTrigger>
                   <DropdownMenuContent>
-                    {blocks.map((block, i) => (
-                      <DropdownMenuItem
-                        key={i}
-                        onClick={() => {
-                          setBlock(block);
-                        }}
-                      >
-                        {block}
-                      </DropdownMenuItem>
-                    ))}
+                    {materialList
+                      ?.slice(1)
+                      ?.map((subArray) => subArray[7])
+                      .filter((item) => item !== "" && item !== undefined)
+                      .map((work, index) => (
+                        <DropdownMenuItem
+                          key={index}
+                          onClick={() => {
+                            setBlock(work);
+                          }}
+                        >
+                          {work}
+                        </DropdownMenuItem>
+                      ))}
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>

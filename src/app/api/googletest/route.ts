@@ -21,7 +21,7 @@ import { auth } from "@/lib/sheetConfig";
 
 
 
-async function WriteToSheet(values) {
+async function WriteToSheet(values: any) {
   const sheets = google.sheets({ version: "v4", auth });
   const spreadsheetId = "1yxSl2Q_yEa-C3IjJa4MguYHd9wmnlElnJ3aaUI3MWSM";
   const range = "DAILY WORK DATA";
@@ -106,7 +106,7 @@ export async function POST(req: Request, res: Response) {
     const {
       slNo,
       date,
-      typeOfWork,
+      material,
       singleDetailOfWork,
       treeListValue,
       maleLabourCount,
@@ -121,7 +121,7 @@ export async function POST(req: Request, res: Response) {
       [
         slNo,
         date,
-        typeOfWork,
+        material,
         singleDetailOfWork,
         treeListValue,
         maleLabourCount,
