@@ -35,20 +35,23 @@ async function WriteToSheet(values: any, baseItem: string, qty: number) {
       range,
     });
     const index =
-      getExisting.data.values
+      (getExisting.data.values
         ?.slice(1)
         ?.map((subArray) => subArray[2])
         .filter((item) => item !== "")
-        .findIndex((val) => val === baseItem) + 1;
+        .findIndex((val) => val === baseItem) as number) + 1;
     const value = getExisting.data.values
       ?.slice(1)
       ?.map((subArray) => subArray[4])
       .filter((item) => item !== "")[index - 1];
 
-    console.log("beat", index, parseInt(value) + qty);
+    console.log("beat", index, parseInt(value) - qty);
+
     if (index - 1 !== -1) {
+      if (parseInt(value) - qty < 0) {
+        return "NOT_ENOUGH_QTY";
+      }
       await updateCellValue(parseInt(value) - qty, index);
-      console.log("Well yeah");
     } else {
       return "ITEM_NOT_FOUND_ON_INVENTORY";
     }
@@ -66,6 +69,22 @@ export async function POST(req: Request, res: Response) {
       baseMaterial,
       parseInt(qty),
     );
+
+    if (write === "ITEM_NOT_FOUND_ON_INVENTORY") {
+      // Means there's no stock
+      return NextResponse.json({
+        res: false,
+        msg: "ITEM_NOT_FOUND_ON_INVENTORY",
+      });
+    }
+
+    if (write === "NOT_ENOUGH_QTY") {
+      // Means there's no stock
+      return NextResponse.json({
+        res: false,
+        msg: "NOT_ENOUGH_QTY",
+      });
+    }
     return NextResponse.json({
       res: true,
       msg: "Successfully deleted data in inventory",

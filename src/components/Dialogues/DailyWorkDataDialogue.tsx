@@ -21,9 +21,10 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { allData, blocks, treeList, typeofWork } from "@/lib/db";
 import { useAppSelector } from "@/redux/store";
+import axios from "axios";
 
 function DailyWorkDataDialogue() {
-  const [slNo, setSlNo] = useState("");
+  const [allInputs, setAllInputs] = useState([]);
   const [typeOfWork, setTypeOfWork] = useState([]);
   const [detailsOfWork, setDetailsOfWork] = useState(allData[0]);
   const [singleDetailOfWork, setSingleDetailOfWork] = useState("");
@@ -37,7 +38,7 @@ function DailyWorkDataDialogue() {
   const { slNoStarts } = useAppSelector((state) => state.authSlice);
   const [open, setOpen] = useState(false);
 
-  function formatDate(date) {
+  function formatDate(date: Date) {
     const day = date.getDate().toString().padStart(2, "0");
     const month = (date.getMonth() + 1).toString().padStart(2, "0");
     const year = date.getFullYear().toString().slice(-2); // Getting last two digits of the year
@@ -81,7 +82,22 @@ function DailyWorkDataDialogue() {
       });
   };
 
-  useEffect(() => {}, []);
+  useEffect(() => {
+    const getFieldsData = async () => {
+      try {
+        const { data } = await axios.get(
+          `/api/getFields?sheetName=LIST AND OPTIONS A`,
+        );
+        // Extracting all materials list from res
+        setAllInputs(data);
+        console.log(data);
+        // console.log("Inventory res", items);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    getFieldsData();
+  }, []);
   return (
     <Dialog open={open}>
       <DialogTrigger>
@@ -117,17 +133,21 @@ function DailyWorkDataDialogue() {
                     />
                   </DropdownMenuTrigger>
                   <DropdownMenuContent>
-                    {typeofWork.map((work, i) => (
-                      <DropdownMenuItem
-                        key={i}
-                        onClick={() => {
-                          setTypeOfWork(work);
-                          setDetailsOfWork(allData[i]);
-                        }}
-                      >
-                        {work}
-                      </DropdownMenuItem>
-                    ))}
+                    {allData
+                      ?.slice(1)
+                      ?.map((subArray) => subArray[2])
+                      .filter((item) => item !== "")
+                      .map((work, index) => (
+                        <DropdownMenuItem
+                          key={index}
+                          onClick={() => {
+                            setMaterial(work);
+                            setMaterialTypeIndex(index + 1);
+                          }}
+                        >
+                          {work}
+                        </DropdownMenuItem>
+                      ))}
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>

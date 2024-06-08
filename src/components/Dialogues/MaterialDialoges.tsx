@@ -48,7 +48,7 @@ function MaterialDialogue() {
     return `${day}.${month}.${year}`;
   }
 
-  const deleteFromInventory = () => {
+  const deleteFromInventory = async () => {
     const payload = {
       date: formatDate(new Date()),
       material,
@@ -57,31 +57,39 @@ function MaterialDialogue() {
       qty: inQty,
     };
 
-    // Send HTTP request to the server
-    fetch("/api/deleteFromInventory", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(payload),
-    })
-      .then((response) => {
-        setOpen(false);
-        if (response.ok) {
-          console.log("Data saved successfully!");
-        } else {
-          throw new Error("Failed to save data");
-        }
-      })
-      .catch((error) => {
-        console.error("Error saving data:", error);
+    try {
+      // Send HTTP request to the server
+      const response = await fetch("/api/deleteFromInventory", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
       });
+
+      setOpen(false);
+      const serverRes = await response.json();
+      if (serverRes?.msg === "ITEM_NOT_FOUND_ON_INVENTORY") {
+        alert("No such inventory");
+      } else if (serverRes?.msg === "NOT_ENOUGH_QTY") {
+        alert("Not enough Qty");
+      } else {
+        handleSave();
+      }
+      if (response.ok) {
+        console.log("Data saved successfully!");
+      } else {
+        throw new Error("Failed to save data");
+      }
+    } catch (error) {
+      console.error("Error saving data:", error);
+    }
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     // Construct your payload with the state values
     const payload = {
-      slNo: slNoMaterial,
+      slNo: slNoStarts,
       date: formatDate(new Date()),
       boughtIssuedBy,
       baseMaterial,
@@ -91,35 +99,35 @@ function MaterialDialogue() {
       remarks,
     };
 
-    // Send HTTP request to the server
-    fetch("/api/googlematerial", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(payload),
-    })
-      .then((response) => {
-        setOpen(false);
-        if (response.ok) {
-          console.log("LOOOOP");
-
-          console.log("Data saved successfully!");
-        } else {
-          throw new Error("Failed to save data");
-        }
-      })
-      .catch((error) => {
-        console.error("Error saving data:", error);
+    try {
+      // Send HTTP request to the server
+      const response = await fetch("/api/googlematerial", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
       });
+
+      setOpen(false);
+
+      if (response.ok) {
+        console.log("LOOOOP");
+        console.log("Data saved successfully!");
+      } else {
+        throw new Error("Failed to save data");
+      }
+    } catch (error) {
+      console.error("Error saving data:", error);
+    }
   };
+
   useEffect(() => {
     const getFieldsData = async () => {
       try {
         const { data } = await axios.get(
           `/api/getFields?sheetName=LIST AND OPTIONS`,
         );
-        console.log(data, "saskaks");
         // Extracting all materials list from res
         setMaterialList(data);
         // console.log("Inventory res", items);
@@ -272,7 +280,7 @@ function MaterialDialogue() {
 
               <Button
                 onClick={() => {
-                  handleSave();
+                  // handleSave();
                   deleteFromInventory();
                 }}
               >

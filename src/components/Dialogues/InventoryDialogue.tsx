@@ -33,7 +33,7 @@ function InventoryDialogue() {
   const { slNoStarts } = useAppSelector((state) => state.authSlice);
   const [open, setOpen] = useState(false);
 
-  function formatDate(date) {
+  function formatDate(date: Date) {
     const day = date.getDate().toString().padStart(2, "0");
     const month = (date.getMonth() + 1).toString().padStart(2, "0");
     const year = date.getFullYear().toString().slice(-2); // Getting last two digits of the year
@@ -130,7 +130,7 @@ function InventoryDialogue() {
                     {materialList
                       ?.slice(1)
                       ?.map((subArray) => subArray[0])
-                      .filter((item) => item !== "")
+                      .filter((item) => item !== "" && item !== undefined)
                       .map((work, index) => (
                         <DropdownMenuItem
                           key={index}
@@ -166,7 +166,7 @@ function InventoryDialogue() {
                     {materialList
                       ?.slice(1)
                       ?.map((subArray) => subArray[materialTypeIndex])
-                      .filter((item) => item !== "")
+                      .filter((item) => item !== "" && item !== undefined)
                       .map((work, index) => (
                         <DropdownMenuItem
                           key={index}
