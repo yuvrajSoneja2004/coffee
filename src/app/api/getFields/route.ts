@@ -28,7 +28,6 @@ export async function readSheet(sheetName: string) {
 
 export async function GET(req: Request, res: Response) {
   try {
-    console.log("GOT HIT INVENTORY");
     const url = new URL(req.url);
     const sheetName = url.searchParams.get("sheetName")?.toString();
     if (sheetName === undefined)
@@ -37,7 +36,6 @@ export async function GET(req: Request, res: Response) {
         msg: "Provide sheetName from client",
       });
 
-    console.log(path.join(__dirname, "../../../lib/google.json"));
     const sheetRes = await readSheet(sheetName);
     return NextResponse.json(sheetRes);
   } catch (error) {

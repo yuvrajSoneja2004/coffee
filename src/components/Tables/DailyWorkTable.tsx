@@ -44,8 +44,10 @@ function DailyWorkTable({ sheetName }: DailyWorkTableProps) {
       dispatch(handleReload(1));
       if ((sheetName = "Daily Work Data")) {
         dispatch(handleSlNo({ no: data?.length }));
-      } else if ((sheetName = "Material")) {
-        console.log("ypu this is material");
+      }
+
+      if (sheetName === "MATERIAL") {
+        console.log("Material", data?.length);
         dispatch(handleSlNoMaterial({ no: data?.length }));
       }
 

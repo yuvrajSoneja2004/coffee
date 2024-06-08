@@ -7,7 +7,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Button } from "../ui/button";
 import { Plus } from "lucide-react";
 import { Input } from "../ui/input";
@@ -21,41 +21,44 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { allData, blocks, treeList, typeofWork } from "@/lib/db";
 import { useAppSelector } from "@/redux/store";
+import axios from "axios";
 
 function MaterialDialogue() {
   const [slNo, setSlNo] = useState("");
+  const [material, setMaterial] = useState<string>("");
+  const [materialList, setMaterialList] = useState([]);
   const [boughtIssuedBy, setBoughtIssuedBy] = useState("");
   const [baseMaterial, setBaseMaterial] = useState("");
   const [singleUnit, setSingleUnit] = useState("");
   const [inQty, setInQty] = useState("");
   const [outQty, setOutQty] = useState("");
   const [remarks, setRemarks] = useState("");
+  const [materialTypeIndex, setMaterialTypeIndex] = useState<number>(0);
+  const [currentItemUnit, setCurrentItemUnit] = useState("");
 
-  const { slNoMaterial } = useAppSelector((state) => state.authSlice);
+  const { slNoMaterial, slNoStarts } = useAppSelector(
+    (state) => state.authSlice,
+  );
   const [open, setOpen] = useState(false);
 
-  function formatDate(date) {
+  function formatDate(date: Date) {
     const day = date.getDate().toString().padStart(2, "0");
     const month = (date.getMonth() + 1).toString().padStart(2, "0");
     const year = date.getFullYear().toString().slice(-2); // Getting last two digits of the year
     return `${day}.${month}.${year}`;
   }
 
-  const handleSave = () => {
-    // Construct your payload with the state values
+  const deleteFromInventory = () => {
     const payload = {
-      slNo: slNoMaterial,
       date: formatDate(new Date()),
-      boughtIssuedBy,
+      material,
       baseMaterial,
-      singleUnit,
-      inQty,
-      outQty,
-      remarks,
+      currentItemUnit,
+      qty: inQty,
     };
 
     // Send HTTP request to the server
-    fetch("/api/googlematerial", {
+    fetch("/api/deleteFromInventory", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -74,6 +77,68 @@ function MaterialDialogue() {
         console.error("Error saving data:", error);
       });
   };
+
+  const handleSave = () => {
+    // Construct your payload with the state values
+    const payload = {
+      slNo: slNoMaterial,
+      date: formatDate(new Date()),
+      boughtIssuedBy,
+      baseMaterial,
+      singleUnit: currentItemUnit,
+      inQty,
+      outQty,
+      remarks,
+    };
+
+    // Send HTTP request to the server
+    fetch("/api/googlematerial", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    })
+      .then((response) => {
+        setOpen(false);
+        if (response.ok) {
+          console.log("LOOOOP");
+
+          console.log("Data saved successfully!");
+        } else {
+          throw new Error("Failed to save data");
+        }
+      })
+      .catch((error) => {
+        console.error("Error saving data:", error);
+      });
+  };
+  useEffect(() => {
+    const getFieldsData = async () => {
+      try {
+        const { data } = await axios.get(
+          `/api/getFields?sheetName=LIST AND OPTIONS`,
+        );
+        console.log(data, "saskaks");
+        // Extracting all materials list from res
+        setMaterialList(data);
+        // console.log("Inventory res", items);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    getFieldsData();
+  }, []);
+
+  // Utility functions to extract data using regex
+  const extractUnit = (str: string) => {
+    const match = str.match(/\[(.*?)\]/);
+    return match ? match[1] : null;
+  };
+
+  const removeBracketsAndContent = (str: string) => {
+    return str?.replace(/\[.*?\]/, "").trim();
+  };
   return (
     <Dialog open={open}>
       <DialogTrigger>
@@ -91,13 +156,12 @@ function MaterialDialogue() {
             <div className="grid w-full grid-cols-2 gap-x-10 gap-y-4">
               <div>
                 <label htmlFor="SL.No.">SL.No</label>
-                <Input className="mt-2" value={slNoMaterial} />
+                <Input className="mt-2" value={slNoStarts} />
               </div>
               <div className="">
                 <label htmlFor="Date">Date</label>
                 <Input className="mt-2" value={formatDate(new Date())} />
               </div>
-              {/* Dropdown  */}
               <div className="mt-2">
                 <label htmlFor="SL.No.">Bought/ Issued By</label>
                 <Input
@@ -107,39 +171,78 @@ function MaterialDialogue() {
                   onChange={(e) => setBoughtIssuedBy(e.target.value)}
                 />
               </div>
-              <div className="mt-2">
-                <label htmlFor="SL.No.">BaseMaterial</label>
-                <Input
-                  className="mt-2"
-                  type="text"
-                  value={baseMaterial}
-                  onChange={(e) => setBaseMaterial(e.target.value)}
-                />
-              </div>
-              <div className="mt-2">
+              <div>
                 <DropdownMenu>
-                  <DropdownMenuTrigger className="flex w-full flex-col items-start">
-                    <label htmlFor="">Unit</label>
+                  <DropdownMenuTrigger className="flex w-full cursor-pointer flex-col items-start">
+                    <label htmlFor="">Material</label>
                     <Input
                       className="mt-2"
-                      placeholder={singleUnit}
-                      value={setSingleUnit}
-                      onChange={(e) => setTreeListValue(e.target.value)}
+                      value={material}
+                      placeholder={material}
                     />
                   </DropdownMenuTrigger>
                   <DropdownMenuContent>
-                    {["GMS", "KG"].map((work, i) => (
-                      <DropdownMenuItem
-                        key={i}
-                        onClick={() => {
-                          setSingleUnit(work);
-                        }}
-                      >
-                        {work}
-                      </DropdownMenuItem>
-                    ))}
+                    {materialList
+                      ?.slice(1)
+                      ?.map((subArray) => subArray[0])
+                      .filter((item) => item !== "")
+                      .map((work, index) => (
+                        <DropdownMenuItem
+                          key={index}
+                          onClick={() => {
+                            setMaterial(work);
+                            setMaterialTypeIndex(index + 1);
+                          }}
+                        >
+                          {work}
+                        </DropdownMenuItem>
+                      ))}
                   </DropdownMenuContent>
                 </DropdownMenu>
+              </div>
+              {/* Baseitem field  */}
+              <div className="mt-2">
+                <DropdownMenu>
+                  <DropdownMenuTrigger
+                    className="flex w-full flex-col items-start"
+                    disabled={material === ""}
+                  >
+                    <label htmlFor="">
+                      {material === "" ? "Select material type" : material}
+                    </label>
+                    <Input
+                      className="mt-2"
+                      placeholder={baseMaterial}
+                      value={baseMaterial}
+                      disabled={material === ""}
+                    />
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent>
+                    {materialList
+                      ?.slice(1)
+                      ?.map((subArray) => subArray[materialTypeIndex])
+                      .filter((item) => item !== "")
+                      .map((work, index) => (
+                        <DropdownMenuItem
+                          key={index}
+                          onClick={() => {
+                            setBaseMaterial(removeBracketsAndContent(work));
+                            setCurrentItemUnit(extractUnit(work) as string);
+                          }}
+                        >
+                          {removeBracketsAndContent(work)}
+                        </DropdownMenuItem>
+                      ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+              <div className="mt-2">
+                <label htmlFor="">Unit</label>
+                <Input
+                  className="mt-2"
+                  placeholder={singleUnit}
+                  value={currentItemUnit}
+                />
               </div>
               <div className="mt-2">
                 <label htmlFor="SL.No.">IN Qty</label>
@@ -167,7 +270,14 @@ function MaterialDialogue() {
                 />
               </div>
 
-              <Button onClick={handleSave}>Save Data</Button>
+              <Button
+                onClick={() => {
+                  handleSave();
+                  deleteFromInventory();
+                }}
+              >
+                Save Data
+              </Button>
             </div>
           </DialogDescription>
         </DialogHeader>
