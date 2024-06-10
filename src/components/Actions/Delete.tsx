@@ -12,23 +12,25 @@ import { Trash2 } from "lucide-react";
 import { Button } from "../ui/button";
 import axios from "axios";
 import { useToast } from "../ui/use-toast";
+import { useDispatch } from "react-redux";
+import { handleReload } from "@/redux/features/authSlice";
 
 function Delete({ rowIndex, isAllowed, sheetName }: any) {
   const { toast } = useToast();
   const [open, setIsOpen] = useState(false);
+  const dispatch = useDispatch();
   const handleDelete = async () => {
     try {
-      const { data } = axios.put("/api/googletest", {
+      await axios.put("/api/googletest", {
         sheetName: sheetName,
         rowIndex: rowIndex + 2,
       });
 
       setIsOpen(false);
-
+      dispatch(handleReload(19));
       toast({
         title: "Deleted successfully",
       });
-      console.log(data);
     } catch (error) {
       console.log(error);
     }

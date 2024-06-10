@@ -65,6 +65,7 @@ function MeteorologicalDialogue() {
       .then((response) => {
         setOpen(false);
         if (response.ok) {
+          dispatch(handleReload(12));
           console.log("Data saved successfully!");
         } else {
           throw new Error("Failed to save data");

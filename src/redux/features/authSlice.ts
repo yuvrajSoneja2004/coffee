@@ -33,7 +33,8 @@ export const auth = createSlice({
       state.slNoMaterial = action.payload.no;
     },
     handleReload(state, action) {
-      state.reloadHandler = action.payload;
+      state.reloadHandler++;
+      
     },
   },
 });

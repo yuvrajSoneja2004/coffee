@@ -21,11 +21,12 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useAppSelector } from "@/redux/store";
 import axios from "axios";
+import { useDispatch } from "react-redux";
+import { handleReload } from "@/redux/features/authSlice";
 
 function DailyWorkDataDialogue() {
   const [material, setMaterial] = useState<string>("");
   const [materialList, setMaterialList] = useState([]);
-
   const [materialTypeIndex, setMaterialTypeIndex] = useState<number>(0);
   const [singleDetailOfWork, setSingleDetailOfWork] = useState("");
   const [treeListValue, setTreeListValue] = useState("");
@@ -38,6 +39,7 @@ function DailyWorkDataDialogue() {
   const { slNoStarts } = useAppSelector((state) => state.authSlice);
   const [open, setOpen] = useState(false);
 
+  const dispatch = useDispatch();
   function formatDate(date: Date) {
     const day = date.getDate().toString().padStart(2, "0");
     const month = (date.getMonth() + 1).toString().padStart(2, "0");
@@ -71,7 +73,9 @@ function DailyWorkDataDialogue() {
     })
       .then((response) => {
         setOpen(false);
+
         if (response.ok) {
+          dispatch(handleReload(12));
           console.log("Data saved successfully!");
         } else {
           throw new Error("Failed to save data");

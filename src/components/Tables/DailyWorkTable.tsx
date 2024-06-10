@@ -41,7 +41,9 @@ function DailyWorkTable({ sheetName }: DailyWorkTableProps) {
         `/api/googletest?sheetName=${sheetName}`,
       );
       console.log(data);
-      dispatch(handleReload(1));
+      // dispatch(handleReload(1));
+      console.log("LOOOOP");
+      // getData();
       if ((sheetName = "Daily Work Data")) {
         dispatch(handleSlNo({ no: data?.length }));
       }

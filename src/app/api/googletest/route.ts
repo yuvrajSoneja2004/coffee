@@ -92,8 +92,6 @@ export async function GET(req: Request, res: Response) {
         res: false,
         msg: "Provide sheetName from client",
       });
-
-    console.log(path.join(__dirname, "../../../lib/google.json"));
     const sheetRes = await readSheet(sheetName);
     return NextResponse.json(sheetRes);
   } catch (error) {
