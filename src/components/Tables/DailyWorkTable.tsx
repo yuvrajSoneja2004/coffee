@@ -41,9 +41,6 @@ function DailyWorkTable({ sheetName }: DailyWorkTableProps) {
         `/api/googletest?sheetName=${sheetName}`,
       );
       console.log(data);
-      // dispatch(handleReload(1));
-      console.log("LOOOOP");
-      // getData();
       if ((sheetName = "Daily Work Data")) {
         dispatch(handleSlNo({ no: data?.length }));
       }
@@ -66,7 +63,7 @@ function DailyWorkTable({ sheetName }: DailyWorkTableProps) {
   }, [reloadHandler]);
 
   if (isLoading) return <Loader additionalStyles="mt-5" />;
-  if (headingRows === "EMPTY") return <NoInfoFound />;
+  if (headingRows.length === 1) return <NoInfoFound />;
 
   return (
     <Table className="border-stroke px-7.5 dark:border-strokedark dark:bg-boxdark mt-6 rounded-md border bg-white py-6 shadow-default">

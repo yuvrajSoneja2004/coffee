@@ -101,7 +101,7 @@ function Edit({ isAllowed, data, rowIndex, sheetName }: any) {
     <Dialog open={open}>
       <DialogTrigger>
         <button
-          className="flex items-center justify-center rounded-md bg-green-500 p-1.5"
+          className="z-50 flex items-center justify-center rounded-md bg-green-500 p-1.5"
           disabled={!isAllowed}
           style={{ opacity: !isAllowed ? 0.5 : 1 }}
           onClick={() => setOpen(true)}
