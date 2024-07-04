@@ -26,14 +26,25 @@ interface DailyWorkTableProps {
   sheetName: string;
 }
 
+interface CategorizedData {
+  [date: string]: string[][];
+}
+
 function DailyWorkTable({ sheetName }: DailyWorkTableProps) {
-  const [headingRows, setHeadingRows] = useState<string[][]>([]);
+  const [categorizedData, setCategorizedData] = useState<CategorizedData>({});
+  const [headers, setHeaders] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { name, role, reloadHandler } = useAppSelector(
     (state) => state.authSlice,
   );
   const dispatch = useDispatch();
 
+  function formatDate(date: Date) {
+    const day = date.getDate().toString().padStart(2, "0");
+    const month = (date.getMonth() + 1).toString().padStart(2, "0");
+    const year = date.getFullYear().toString().slice(-2); // Getting last two digits of the year
+    return `${day}.${month}.${year}`;
+  }
   const getData = async () => {
     setIsLoading(true);
     try {
@@ -41,29 +52,50 @@ function DailyWorkTable({ sheetName }: DailyWorkTableProps) {
         `/api/googletest?sheetName=${sheetName}`,
       );
       console.log(data);
+
+      const [headerRow, ...dataRows] = data;
+      setHeaders(headerRow);
+
+      // Group data by dates
+      const categorized: CategorizedData = {};
+      dataRows.forEach((row: string[]) => {
+        const date = row[1];
+        if (!categorized[date]) {
+          categorized[date] = [];
+        }
+        categorized[date].push(row);
+      });
+
+      setCategorizedData(categorized);
+
       if ((sheetName = "Daily Work Data")) {
-        dispatch(handleSlNo({ no: data?.length }));
+        // const lastEntryDate = "03.07.24";
+        const lastEntryDate = dataRows[dataRows.length - 1][1];
+        console.log("Pyaar", lastEntryDate);
+        const todayDate = formatDate(new Date());
+        console.log("Aaj", todayDate);
+
+        if (lastEntryDate !== todayDate) {
+          dispatch(handleSlNo({ no: data?.length }));
+        }
       }
 
       if (sheetName === "MATERIAL") {
         console.log("Material", data?.length);
         dispatch(handleSlNoMaterial({ no: data?.length }));
       }
-
-      setHeadingRows(data);
     } catch (error) {
       console.log(error);
     } finally {
       setIsLoading(false);
     }
   };
-
   useEffect(() => {
     getData();
   }, [reloadHandler]);
 
   if (isLoading) return <Loader additionalStyles="mt-5" />;
-  if (headingRows.length === 1) return <NoInfoFound />;
+  if (Object.keys(categorizedData).length === 0) return <NoInfoFound />;
 
   return (
     <Table className="border-stroke px-7.5 dark:border-strokedark dark:bg-boxdark mt-6 rounded-md border bg-white py-6 shadow-default">
@@ -71,7 +103,7 @@ function DailyWorkTable({ sheetName }: DailyWorkTableProps) {
       <TableHeader>
         <TableRow className="text-sm">
           {/* Render table headings */}
-          {headingRows[0]?.map((heading, index) => (
+          {headers.map((heading, index) => (
             <TableHead className="text-[14px] font-bold" key={index}>
               {heading}
             </TableHead>
@@ -84,54 +116,45 @@ function DailyWorkTable({ sheetName }: DailyWorkTableProps) {
         </TableRow>
       </TableHeader>
       <TableBody>
-        {/* Render table rows */}
-        {headingRows.slice(1).map((row, rowIndex) => (
-          <TableRow key={rowIndex}>
-            {row.map((cell, cellIndex) => {
-              if (sheetName && cellIndex === row.length - 1) {
-                // If it's the "Action" column, render a button
-                return (
-                  <React.Fragment key={cellIndex}>
-                    <TableCell>{cell}</TableCell>
-                    <TableCell>
-                      <div className="flex items-center justify-center gap-1">
-                        <Delete
-                          rowIndex={rowIndex}
-                          isAllowed={role === "Admin"}
-                          sheetName={sheetName}
-                        />
-                        {sheetName === "DAILY WORK DATA" ? (
-                          <Edit
-                            isAllowed={role === "Admin"}
-                            data={row}
-                            rowIndex={rowIndex}
-                            sheetName={sheetName}
-                          />
-                        ) : sheetName === "MATERIALS" ? (
-                          <Edit
-                            isAllowed={role === "Admin"}
-                            data={row}
-                            rowIndex={rowIndex}
-                            sheetName={sheetName}
-                          />
-                        ) : (
-                          <Edit
-                            isAllowed={role === "Admin"}
-                            data={row}
-                            rowIndex={rowIndex}
-                            sheetName={sheetName}
-                          />
-                        )}
-                      </div>
-                    </TableCell>
-                  </React.Fragment>
-                );
-              } else {
-                // Otherwise, render regular cell content
-                return <TableCell key={cellIndex}>{cell}</TableCell>;
-              }
-            })}
-          </TableRow>
+        {/* Render categorized data by dates */}
+        {Object.entries(categorizedData).map(([date, rows], dateIndex) => (
+          <React.Fragment key={dateIndex}>
+            <TableRow>
+              <TableCell colSpan={headers.length + 1} className="font-bold">
+                {date}
+              </TableCell>
+            </TableRow>
+            {rows.map((row, rowIndex) => (
+              <TableRow key={rowIndex}>
+                {row.map((cell, cellIndex) => {
+                  if (sheetName && cellIndex === row.length - 1) {
+                    return (
+                      <React.Fragment key={cellIndex}>
+                        <TableCell>{cell}</TableCell>
+                        <TableCell>
+                          <div className="flex items-center justify-center gap-1">
+                            <Delete
+                              rowIndex={rowIndex}
+                              isAllowed={role === "Admin"}
+                              sheetName={sheetName}
+                            />
+                            <Edit
+                              isAllowed={role === "Admin"}
+                              data={row}
+                              rowIndex={rowIndex}
+                              sheetName={sheetName}
+                            />
+                          </div>
+                        </TableCell>
+                      </React.Fragment>
+                    );
+                  } else {
+                    return <TableCell key={cellIndex}>{cell}</TableCell>;
+                  }
+                })}
+              </TableRow>
+            ))}
+          </React.Fragment>
         ))}
       </TableBody>
     </Table>

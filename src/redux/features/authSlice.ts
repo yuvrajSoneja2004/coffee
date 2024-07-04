@@ -11,7 +11,7 @@ interface InitialState {
 let initialState: InitialState = {
   name: "",
   role: "",
-  slNoStarts: 0,
+  slNoStarts: 1,
   slNoMaterial: 0,
   reloadHandler: 0,
 };
@@ -26,7 +26,7 @@ export const auth = createSlice({
     },
     handleSlNo(state, action) {
       console.log(action.payload.no - 1, "action");
-      state.slNoStarts = action.payload.no;
+      state.slNoStarts = action.payload.no - 1;
     },
     handleSlNoMaterial(state, action) {
       console.log(action.payload.no - 1, "action");
@@ -34,7 +34,6 @@ export const auth = createSlice({
     },
     handleReload(state, action) {
       state.reloadHandler++;
-      
     },
   },
 });
