@@ -19,7 +19,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { allData, blocks, treeList, typeofWork } from "@/lib/db";
 import { useAppSelector } from "@/redux/store";
 import axios from "axios";
 
@@ -30,8 +29,8 @@ function MaterialDialogue() {
   const [boughtIssuedBy, setBoughtIssuedBy] = useState("");
   const [baseMaterial, setBaseMaterial] = useState("");
   const [singleUnit, setSingleUnit] = useState("");
-  const [inQty, setInQty] = useState("");
-  const [outQty, setOutQty] = useState("");
+  const [qtyType, setQtyType] = useState<"in" | "out">("in");
+  const [qty, setQty] = useState("");
   const [remarks, setRemarks] = useState("");
   const [materialTypeIndex, setMaterialTypeIndex] = useState<number>(0);
   const [currentItemUnit, setCurrentItemUnit] = useState("");
@@ -54,7 +53,8 @@ function MaterialDialogue() {
       material,
       baseMaterial,
       currentItemUnit,
-      qty: inQty,
+      qtyType,
+      qty: qty,
     };
 
     try {
@@ -94,8 +94,8 @@ function MaterialDialogue() {
       boughtIssuedBy,
       baseMaterial,
       singleUnit: currentItemUnit,
-      inQty,
-      outQty,
+      inQty: qtyType === "in" ? qty : "",
+      outQty: qtyType === "out" ? qty : "",
       remarks,
     };
 
@@ -112,7 +112,6 @@ function MaterialDialogue() {
       setOpen(false);
 
       if (response.ok) {
-        console.log("LOOOOP");
         console.log("Data saved successfully!");
       } else {
         throw new Error("Failed to save data");
@@ -147,6 +146,7 @@ function MaterialDialogue() {
   const removeBracketsAndContent = (str: string) => {
     return str?.replace(/\[.*?\]/, "").trim();
   };
+
   return (
     <Dialog open={open}>
       <DialogTrigger>
@@ -252,29 +252,44 @@ function MaterialDialogue() {
                   value={currentItemUnit}
                 />
               </div>
-              <div className="mt-2">
-                <label htmlFor="SL.No.">IN Qty</label>
+              <div className="mt-2 flex items-center justify-center">
+                <label htmlFor="inQty">IN Qty</label>
                 <Input
-                  className="mt-2"
-                  type="text"
-                  value={inQty}
-                  onChange={(e) => setInQty(e.target.value)}
+                  className="ml-2 w-4"
+                  type="radio"
+                  value="in"
+                  checked={qtyType === "in"}
+                  onChange={() => setQtyType("in")}
+                  id="inQty"
+                />
+              </div>
+              <div className="mt-2 flex items-center justify-center">
+                <label htmlFor="outQty">OUT Qty</label>
+                <Input
+                  className="ml-2 w-4"
+                  type="radio"
+                  value="out"
+                  checked={qtyType === "out"}
+                  onChange={() => setQtyType("out")}
+                  id="outQty"
                 />
               </div>
               <div className="mt-2">
-                <label htmlFor="SL.No.">OUT Qty</label>
+                <label htmlFor="qty">Enter {qtyType.toUpperCase()} QTY</label>
                 <Input
                   className="mt-2"
-                  value={outQty}
-                  onChange={(e) => setOutQty(e.target.value)}
+                  value={qty}
+                  onChange={(e) => setQty(e.target.value)}
+                  id="qty"
                 />
               </div>
               <div className="mt-2">
-                <label htmlFor="SL.No.">Remarks</label>
+                <label htmlFor="remarks">Remarks</label>
                 <Input
                   className="mt-2"
                   value={remarks}
                   onChange={(e) => setRemarks(e.target.value)}
+                  id="remarks"
                 />
               </div>
 

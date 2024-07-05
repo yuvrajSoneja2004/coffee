@@ -22,7 +22,12 @@ async function updateCellValue(valueToUpdate: number, cellPosition: number) {
     console.error(error, "Error writing to sheet");
   }
 }
-async function WriteToSheet(values: any, baseItem: string, qty: number) {
+async function WriteToSheet(
+  values: any,
+  baseItem: string,
+  qty: number,
+  qtyType: string,
+) {
   const sheets = google.sheets({ version: "v4", auth });
   const spreadsheetId = "1yxSl2Q_yEa-C3IjJa4MguYHd9wmnlElnJ3aaUI3MWSM";
   const range = "INVENTORY";
@@ -51,7 +56,12 @@ async function WriteToSheet(values: any, baseItem: string, qty: number) {
       if (parseInt(value) - qty < 0) {
         return "NOT_ENOUGH_QTY";
       }
-      await updateCellValue(parseInt(value) - qty, index);
+
+      if (qtyType === "out") {
+        await updateCellValue(parseInt(value) - qty, index);
+      } else {
+        await updateCellValue(parseInt(value) + qty, index);
+      }
     } else {
       return "ITEM_NOT_FOUND_ON_INVENTORY";
     }
@@ -62,12 +72,13 @@ async function WriteToSheet(values: any, baseItem: string, qty: number) {
 
 export async function POST(req: Request, res: Response) {
   try {
-    const { date, material, baseMaterial, currentItemUnit, qty } =
+    const { date, material, baseMaterial, currentItemUnit, qtyType, qty } =
       await req.json();
     const write = await WriteToSheet(
       [[date, material, baseMaterial, currentItemUnit, qty]],
       baseMaterial,
       parseInt(qty),
+      qtyType,
     );
 
     if (write === "ITEM_NOT_FOUND_ON_INVENTORY") {
