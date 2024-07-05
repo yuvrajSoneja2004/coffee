@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/dialog";
 import React, { useEffect, useState } from "react";
 import { Button } from "../ui/button";
-import { Plus } from "lucide-react";
+import { Plus, RotateCcw } from "lucide-react";
 import { Input } from "../ui/input";
 import {
   DropdownMenu,
@@ -21,6 +21,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useAppSelector } from "@/redux/store";
 import axios from "axios";
+import { handleReload } from "@/redux/features/authSlice";
+import { useDispatch } from "react-redux";
 
 function MaterialDialogue() {
   const [slNo, setSlNo] = useState("");
@@ -34,6 +36,7 @@ function MaterialDialogue() {
   const [remarks, setRemarks] = useState("");
   const [materialTypeIndex, setMaterialTypeIndex] = useState<number>(0);
   const [currentItemUnit, setCurrentItemUnit] = useState("");
+  const dispatch = useDispatch();
 
   const { slNoMaterial, slNoStarts } = useAppSelector(
     (state) => state.authSlice,
@@ -110,6 +113,7 @@ function MaterialDialogue() {
       });
 
       setOpen(false);
+      dispatch(handleReload(12));
 
       if (response.ok) {
         console.log("Data saved successfully!");
@@ -149,15 +153,20 @@ function MaterialDialogue() {
 
   return (
     <Dialog open={open}>
-      <DialogTrigger>
-        <Button
-          className="flex-center flex gap-2"
-          onClick={() => setOpen(true)}
-        >
-          <Plus />
-          Add Data
+      <div className="flex items-center justify-between">
+        <DialogTrigger>
+          <Button
+            className="flex-center flex gap-2"
+            onClick={() => setOpen(true)}
+          >
+            <Plus />
+            Add Data
+          </Button>
+        </DialogTrigger>
+        <Button onClick={() => dispatch(handleReload(12))}>
+          <RotateCcw size={16} />
         </Button>
-      </DialogTrigger>
+      </div>
       <DialogContent className="" onInteractOutside={() => setOpen(false)}>
         <DialogHeader>
           <DialogDescription className="">

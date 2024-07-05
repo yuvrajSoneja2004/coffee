@@ -130,7 +130,7 @@ function DailyWorkTable({ sheetName }: DailyWorkTableProps) {
             <TableRow className="bg-gray-200">
               <TableCell
                 colSpan={headers.length + 1}
-                className="text-center text-lg font-bold"
+                className="text-left text-lg font-bold"
               >
                 {date}
               </TableCell>

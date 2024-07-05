@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { google } from "googleapis";
 import path from "path";
 import { auth } from "@/lib/sheetConfig";
+import { sheedIds } from "@/lib/pagesSheetids"
 
 type SheetData = (string | number)[][];
 
@@ -58,15 +59,46 @@ export async function readSheet(sheetName: string) {
   }
 }
 
+// export async function deleteRow(sheetName: string, rowIndex: number) {
+//   const sheets = google.sheets({ version: "v4", auth });
+//   const spreadsheetId = "1yxSl2Q_yEa-C3IjJa4MguYHd9wmnlElnJ3aaUI3MWSM";
+//   const range = `${sheetName}!${rowIndex}:${rowIndex}`;
+
+//   try {
+//     const res = await sheets.spreadsheets.values.clear({
+//       spreadsheetId,
+//       range,
+//     });
+//     return res;
+//   } catch (error) {
+//     console.error("Error deleting row:", error);
+//     throw error;
+//   }
+// }
+
 export async function deleteRow(sheetName: string, rowIndex: number) {
   const sheets = google.sheets({ version: "v4", auth });
   const spreadsheetId = "1yxSl2Q_yEa-C3IjJa4MguYHd9wmnlElnJ3aaUI3MWSM";
   const range = `${sheetName}!${rowIndex}:${rowIndex}`;
+  const requestBody = {
+    requests: [
+      {
+        deleteDimension: {
+          range: {
+            sheetId: sheedIds[sheetName], // Assuming sheetId 0, change if necessary
+            dimension: 'ROWS',
+            startIndex: rowIndex - 1,
+            endIndex: rowIndex, // Delete only one row
+          },
+        },
+      },
+    ],
+  };
 
   try {
-    const res = await sheets.spreadsheets.values.clear({
+    const res = await sheets.spreadsheets.batchUpdate({
       spreadsheetId,
-      range,
+      requestBody,
     });
     return res;
   } catch (error) {
@@ -74,7 +106,7 @@ export async function deleteRow(sheetName: string, rowIndex: number) {
     throw error;
   }
 }
-
+// 1554936636
 // ? Categorize data on the basis of data
 // Well did'nt used this function , maybe will user later
 // function categorizeByDate(sheetData: SheetData): CategorizedData {

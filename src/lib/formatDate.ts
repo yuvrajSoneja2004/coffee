@@ -6,7 +6,7 @@ function format_Date(date: Date) {
 }
 
 export const formatDate = (date?: string) => {
-  return format_Date(date ? new Date(date) : new Date("2024-07-26"));
+  return format_Date(date ? new Date(date) : new Date());
 };
 // export const formatDate = (date?: string) => {
 //   return format_Date(date ? new Date(date) : new Date());
