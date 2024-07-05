@@ -21,6 +21,7 @@ import {
   handleSlNoMaterial,
 } from "@/redux/features/authSlice";
 import Edit from "../Actions/DailyMaterialData/Edit";
+import { formatDate } from "@/lib/formatDate";
 
 interface DailyWorkTableProps {
   sheetName: string;
@@ -39,12 +40,12 @@ function DailyWorkTable({ sheetName }: DailyWorkTableProps) {
   );
   const dispatch = useDispatch();
 
-  function formatDate(date: Date) {
-    const day = date.getDate().toString().padStart(2, "0");
-    const month = (date.getMonth() + 1).toString().padStart(2, "0");
-    const year = date.getFullYear().toString().slice(-2); // Getting last two digits of the year
-    return `${day}.${month}.${year}`;
-  }
+  // function formatDate(date: Date) {
+  //   const day = date.getDate().toString().padStart(2, "0");
+  //   const month = (date.getMonth() + 1).toString().padStart(2, "0");
+  //   const year = date.getFullYear().toString().slice(-2); // Getting last two digits of the year
+  //   return `${day}.${month}.${year}`;
+  // }
   const getData = async () => {
     setIsLoading(true);
     try {
@@ -71,12 +72,17 @@ function DailyWorkTable({ sheetName }: DailyWorkTableProps) {
       if ((sheetName = "Daily Work Data")) {
         // const lastEntryDate = "03.07.24";
         const lastEntryDate = dataRows[dataRows.length - 1][1];
-        console.log("Pyaar", lastEntryDate);
-        const todayDate = formatDate(new Date());
+        const lastEntrySl = dataRows[dataRows.length - 1][0];
+        console.log("Pyaar", lastEntrySl);
+        const todayDate = formatDate();
+        // const todayDate = formatDate(new Date());
+        // const todayDate = formatDate(new Date("2024-07-06"));
         console.log("Aaj", todayDate);
 
         if (lastEntryDate !== todayDate) {
-          dispatch(handleSlNo({ no: data?.length }));
+          dispatch(handleSlNo({ no: parseInt(lastEntrySl) }));
+        } else {
+          // dispatch(handleSlNo({ no: parseInt(lastEntrySl) }));
         }
       }
 
@@ -103,11 +109,13 @@ function DailyWorkTable({ sheetName }: DailyWorkTableProps) {
       <TableHeader>
         <TableRow className="text-sm">
           {/* Render table headings */}
-          {headers.map((heading, index) => (
-            <TableHead className="text-[14px] font-bold" key={index}>
-              {heading}
-            </TableHead>
-          ))}
+          {headers.map((heading, index) => {
+            return (
+              <TableHead className="text-[14px] font-bold" key={index}>
+                {heading}
+              </TableHead>
+            );
+          })}
           {sheetName && (
             <TableHead className="text-[14px] font-bold" align="center">
               Action
@@ -119,8 +127,11 @@ function DailyWorkTable({ sheetName }: DailyWorkTableProps) {
         {/* Render categorized data by dates */}
         {Object.entries(categorizedData).map(([date, rows], dateIndex) => (
           <React.Fragment key={dateIndex}>
-            <TableRow>
-              <TableCell colSpan={headers.length + 1} className="font-bold">
+            <TableRow className="bg-gray-200">
+              <TableCell
+                colSpan={headers.length + 1}
+                className="text-center text-lg font-bold"
+              >
                 {date}
               </TableCell>
             </TableRow>

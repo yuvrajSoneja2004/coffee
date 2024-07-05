@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/dialog";
 import React, { useEffect, useState } from "react";
 import { Button } from "../ui/button";
-import { Plus } from "lucide-react";
+import { Plus, RotateCcw } from "lucide-react";
 import { Input } from "../ui/input";
 import {
   DropdownMenu,
@@ -23,8 +23,12 @@ import { useAppSelector } from "@/redux/store";
 import axios from "axios";
 import { useDispatch } from "react-redux";
 import { handleReload } from "@/redux/features/authSlice";
+import { useToast } from "../ui/use-toast";
+import { formatDate } from "@/lib/formatDate";
 
 function DailyWorkDataDialogue() {
+  const { toast } = useToast();
+
   const [material, setMaterial] = useState<string>("");
   const [materialList, setMaterialList] = useState([]);
   const [materialTypeIndex, setMaterialTypeIndex] = useState<number>(0);
@@ -40,18 +44,19 @@ function DailyWorkDataDialogue() {
   const [open, setOpen] = useState(false);
 
   const dispatch = useDispatch();
-  function formatDate(date: Date) {
-    const day = date.getDate().toString().padStart(2, "0");
-    const month = (date.getMonth() + 1).toString().padStart(2, "0");
-    const year = date.getFullYear().toString().slice(-2); // Getting last two digits of the year
-    return `${day}.${month}.${year}`;
-  }
+  // function formatDate(date: Date) {
+  //   const day = date.getDate().toString().padStart(2, "0");
+  //   const month = (date.getMonth() + 1).toString().padStart(2, "0");
+  //   const year = date.getFullYear().toString().slice(-2); // Getting last two digits of the year
+  //   return `${day}.${month}.${year}`;
+  // }
 
-  const handleSave = () => {
+  const handleSave = (hasToReload: boolean) => {
     // Construct your payload with the state values
     const payload = {
       slNo: slNoStarts,
-      date: formatDate(new Date()),
+      date: formatDate(),
+      // date: formatDate(new Date()),
       material,
       singleDetailOfWork,
       treeListValue,
@@ -72,10 +77,21 @@ function DailyWorkDataDialogue() {
       body: JSON.stringify(payload),
     })
       .then((response) => {
-        setOpen(false);
-
         if (response.ok) {
-          dispatch(handleReload(12));
+          if (hasToReload) {
+            setOpen(false);
+            dispatch(handleReload(12));
+            // reset all the states
+            setMaterial("");
+            setSingleDetailOfWork("");
+            setTreeListValue("");
+            setMaleLabourCount("");
+            setFemaleLabourCount("");
+            setBlock("");
+            setRowFrom("");
+            setRowTo("");
+            setTreeCount("");
+          }
           console.log("Data saved successfully!");
         } else {
           throw new Error("Failed to save data");
@@ -84,6 +100,25 @@ function DailyWorkDataDialogue() {
       .catch((error) => {
         console.error("Error saving data:", error);
       });
+  };
+
+  const handleSaveAndAddMore = (hasToReload: boolean) => {
+    handleSave(hasToReload);
+    toast({
+      title: "Successfuly Saved Daily Work Data Info.",
+    });
+    setOpen(true);
+
+    // reset all the states
+    setMaterial("");
+    setSingleDetailOfWork("");
+    setTreeListValue("");
+    setMaleLabourCount("");
+    setFemaleLabourCount("");
+    setBlock("");
+    setRowFrom("");
+    setRowTo("");
+    setTreeCount("");
   };
 
   useEffect(() => {
@@ -105,15 +140,20 @@ function DailyWorkDataDialogue() {
 
   return (
     <Dialog open={open}>
-      <DialogTrigger>
-        <Button
-          className="flex-center flex gap-2"
-          onClick={() => setOpen(true)}
-        >
-          <Plus />
-          Add Data
+      <div className="flex items-center justify-between">
+        <DialogTrigger>
+          <Button
+            className="flex-center flex gap-2"
+            onClick={() => setOpen(true)}
+          >
+            <Plus />
+            Add Data
+          </Button>
+        </DialogTrigger>
+        <Button onClick={() => dispatch(handleReload(12))}>
+          <RotateCcw size={16} />
         </Button>
-      </DialogTrigger>
+      </div>
       <DialogContent className="" onInteractOutside={() => setOpen(false)}>
         <DialogHeader>
           <DialogDescription className="">
@@ -124,7 +164,7 @@ function DailyWorkDataDialogue() {
               </div>
               <div>
                 <label htmlFor="Date">Date</label>
-                <Input className="mt-2" value={formatDate(new Date())} />
+                <Input className="mt-2" value={formatDate()} />
               </div>
               {/* Dropdown  */}
               <div className="mt-2">
@@ -286,7 +326,11 @@ function DailyWorkDataDialogue() {
                   onChange={(e) => setTreeCount(e.target.value)}
                 />
               </div>
-              <Button onClick={handleSave}>Save Data</Button>
+              <div className="mt-2"></div>
+              <Button onClick={() => handleSave(true)}>Save Data</Button>
+              <Button onClick={() => handleSaveAndAddMore(false)}>
+                Save & Add More
+              </Button>
             </div>
           </DialogDescription>
         </DialogHeader>

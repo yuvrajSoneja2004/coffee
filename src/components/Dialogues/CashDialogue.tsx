@@ -23,6 +23,7 @@ import { useAppSelector } from "@/redux/store";
 import axios from "axios";
 import { useDispatch } from "react-redux";
 import { handleReload } from "@/redux/features/authSlice";
+import { formatDate } from "@/lib/formatDate";
 
 function CashDialogue() {
   const [expense, setExpense] = useState("");
@@ -32,18 +33,12 @@ function CashDialogue() {
   const [open, setOpen] = useState(false);
 
   const dispatch = useDispatch();
-  function formatDate(date: Date) {
-    const day = date.getDate().toString().padStart(2, "0");
-    const month = (date.getMonth() + 1).toString().padStart(2, "0");
-    const year = date.getFullYear().toString().slice(-2); // Getting last two digits of the year
-    return `${day}.${month}.${year}`;
-  }
 
   const handleSave = () => {
     // Construct your payload with the state values
     const payload = {
       slNo: slNoStarts,
-      date: formatDate(new Date()),
+      date: formatDate(),
       expense,
       amount,
       remarks,

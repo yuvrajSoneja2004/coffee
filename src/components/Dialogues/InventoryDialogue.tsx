@@ -22,6 +22,9 @@ import {
 import { allData, blocks, treeList, typeofWork } from "@/lib/db";
 import { useAppSelector } from "@/redux/store";
 import axios from "axios";
+import { formatDate } from "@/lib/formatDate";
+import { handleReload } from "@/redux/features/authSlice";
+import { useDispatch } from "react-redux";
 
 function InventoryDialogue() {
   const [material, setMaterial] = useState<string>("");
@@ -32,18 +35,12 @@ function InventoryDialogue() {
   const [qty, setQty] = useState<string>("0");
   const { slNoStarts } = useAppSelector((state) => state.authSlice);
   const [open, setOpen] = useState(false);
-
-  function formatDate(date: Date) {
-    const day = date.getDate().toString().padStart(2, "0");
-    const month = (date.getMonth() + 1).toString().padStart(2, "0");
-    const year = date.getFullYear().toString().slice(-2); // Getting last two digits of the year
-    return `${day}.${month}.${year}`;
-  }
+  const dispatch = useDispatch();
 
   const handleSave = () => {
     // Construct your payload with the state values
     const payload = {
-      date: formatDate(new Date()),
+      date: formatDate(),
       material,
       baseItem,
       currentItemUnit,
@@ -61,6 +58,7 @@ function InventoryDialogue() {
       .then((response) => {
         setOpen(false);
         if (response.ok) {
+          dispatch(handleReload(12));
           console.log("Inventory saved successfully!");
         } else {
           throw new Error("Failed to save data");

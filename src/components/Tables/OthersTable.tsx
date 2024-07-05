@@ -42,7 +42,7 @@ export default function OthersTable({ sheetName }: DailyWorkTableProps) {
       );
       console.log(data);
       if ((sheetName = "Daily Work Data")) {
-        dispatch(handleSlNo({ no: data?.length }));
+        dispatch(handleSlNo({ no: data?.length - 1 }));
       }
 
       if (sheetName === "MATERIAL") {

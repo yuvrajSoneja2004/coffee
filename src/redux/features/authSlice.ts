@@ -25,8 +25,8 @@ export const auth = createSlice({
       state.role = action.payload.role;
     },
     handleSlNo(state, action) {
-      console.log(action.payload.no - 1, "action");
-      state.slNoStarts = action.payload.no - 1;
+      console.log(action.payload.no + 1, "action");
+      state.slNoStarts = action.payload.no + 1;
     },
     handleSlNoMaterial(state, action) {
       console.log(action.payload.no - 1, "action");

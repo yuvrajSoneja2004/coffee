@@ -23,6 +23,7 @@ import { allData, blocks, treeList, typeofWork } from "@/lib/db";
 import { useAppSelector } from "@/redux/store";
 import { useDispatch } from "react-redux";
 import { handleReload } from "@/redux/features/authSlice";
+import { formatDate } from "@/lib/formatDate";
 
 function MeteorologicalDialogue() {
   const [rainfall, setRainfall] = useState();
@@ -37,16 +38,10 @@ function MeteorologicalDialogue() {
   const dispatch = useDispatch();
   const [open, setOpen] = useState(false);
 
-  function formatDate(date) {
-    const day = date.getDate().toString().padStart(2, "0");
-    const month = (date.getMonth() + 1).toString().padStart(2, "0");
-    const year = date.getFullYear().toString().slice(-2); // Getting last two digits of the year
-    return `${day}.${month}.${year}`;
-  }
   const handleSave = () => {
     // Construct your payload with the state values
     const payload = {
-      date: formatDate(new Date()),
+      date: formatDate(),
       rainfall,
       humidityMin: humidity.min,
       humidityMax: humidity.max,

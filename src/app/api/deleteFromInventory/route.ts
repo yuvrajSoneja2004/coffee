@@ -35,40 +35,52 @@ async function WriteToSheet(
   const resource = { values };
 
   try {
+    // Fetch existing inventory data
     const getExisting = await sheets.spreadsheets.values.get({
       spreadsheetId,
       range,
     });
+
+    // Extract index of baseItem and current quantity value
     const index =
       (getExisting.data.values
         ?.slice(1)
         ?.map((subArray) => subArray[2])
-        .filter((item) => item !== "")
         .findIndex((val) => val === baseItem) as number) + 1;
-    const value = getExisting.data.values
-      ?.slice(1)
-      ?.map((subArray) => subArray[4])
-      .filter((item) => item !== "")[index - 1];
 
-    console.log("beat", index, parseInt(value) - qty);
-
-    if (index - 1 !== -1) {
-      if (parseInt(value) - qty < 0) {
-        return "NOT_ENOUGH_QTY";
-      }
-
-      if (qtyType === "out") {
-        await updateCellValue(parseInt(value) - qty, index);
-      } else {
-        await updateCellValue(parseInt(value) + qty, index);
-      }
-    } else {
+    if (index === 0) {
+      // If baseItem not found in inventory
       return "ITEM_NOT_FOUND_ON_INVENTORY";
     }
+
+    const value = parseInt(getExisting.data.values[index][4]);
+
+    // Check inventory availability for IN and OUT operations
+    if (qtyType === "in") {
+      // IN operation: Check if there's enough material
+      if (value + qty > 100) {
+        // Change value from 0 to 100
+        return "NOT_ENOUGH_MATERIALS";
+      }
+      await updateCellValue(value + qty, index);
+    } else if (qtyType === "out") {
+      // OUT operation: Check if there's enough quantity to take out
+      if (value - qty < 0) {
+        return "NOT_ENOUGH_QTY";
+      }
+      await updateCellValue(value - qty, index);
+    } else {
+      throw new Error("Invalid qtyType provided");
+    }
+
+    // Successfully updated inventory
+    return "SUCCESS";
   } catch (error) {
-    console.log(error, "deleteFromInventory");
+    console.error(error, "Error in WriteToSheet");
+    throw error; // Propagate the error back to caller
   }
 }
+
 
 export async function POST(req: Request, res: Response) {
   try {
