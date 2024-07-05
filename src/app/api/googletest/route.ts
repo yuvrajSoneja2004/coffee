@@ -85,8 +85,8 @@ export async function deleteRow(sheetName: string, rowIndex: number) {
       {
         deleteDimension: {
           range: {
-            sheetId: sheedIds[sheetName], // Assuming sheetId 0, change if necessary
-            dimension: 'ROWS',
+            sheetId: sheedIds[sheetName],
+            dimension: "ROWS",
             startIndex: rowIndex - 1,
             endIndex: rowIndex, // Delete only one row
           },

@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/dialog";
 import React, { useEffect, useState } from "react";
 import { Button } from "../ui/button";
-import { Plus } from "lucide-react";
+import { Plus, RotateCcw } from "lucide-react";
 import { Input } from "../ui/input";
 import {
   DropdownMenu,
@@ -96,15 +96,20 @@ function InventoryDialogue() {
   };
   return (
     <Dialog open={open}>
-      <DialogTrigger>
-        <Button
-          className="flex-center flex gap-2"
-          onClick={() => setOpen(true)}
-        >
-          <Plus />
-          Add Data
+      <div className="flex items-center justify-between">
+        <DialogTrigger>
+          <Button
+            className="flex-center flex gap-2"
+            onClick={() => setOpen(true)}
+          >
+            <Plus />
+            Add Data
+          </Button>
+        </DialogTrigger>
+        <Button onClick={() => dispatch(handleReload(12))}>
+          <RotateCcw size={16} />
         </Button>
-      </DialogTrigger>
+      </div>
       <DialogContent className="" onInteractOutside={() => setOpen(false)}>
         <DialogHeader>
           <DialogDescription className="">
