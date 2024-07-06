@@ -96,15 +96,15 @@ function InventoryDialogue() {
     return str?.replace(/\[.*?\]/, "").trim();
   };
 
-  const handleInventoryFilter = async (filterOption: string) => {
-    try {
-      const { data } = await axios.get(
-        `/api/filterInventory?filterOption=${filterOption}`,
-      );
-    } catch (error) {
-      console.log(error);
-    }
-  };
+  // const handleInventoryFilter = async (filterOption: string) => {
+  //   try {
+  //     const { data } = await axios.get(
+  //       `/api/filterInventory?filterOption=${filterOption}`,
+  //     );
+  //   } catch (error) {
+  //     console.log(error);
+  //   }
+  // };
   return (
     <Dialog open={open}>
       <div className="flex items-center justify-between">
