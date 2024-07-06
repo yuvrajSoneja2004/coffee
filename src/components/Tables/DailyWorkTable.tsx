@@ -52,7 +52,6 @@ function DailyWorkTable({ sheetName }: DailyWorkTableProps) {
       const { data } = await axios.get(
         `/api/googletest?sheetName=${sheetName}`,
       );
-      console.log(data);
 
       const [headerRow, ...dataRows] = data;
       setHeaders(headerRow);
@@ -73,11 +72,9 @@ function DailyWorkTable({ sheetName }: DailyWorkTableProps) {
         // const lastEntryDate = "03.07.24";
         const lastEntryDate = dataRows[dataRows.length - 1][1];
         const lastEntrySl = dataRows[dataRows.length - 1][0];
-        console.log("Pyaar", lastEntrySl);
         const todayDate = formatDate();
         // const todayDate = formatDate(new Date());
         // const todayDate = formatDate(new Date("2024-07-06"));
-        console.log("Aaj", todayDate);
 
         if (lastEntryDate !== todayDate) {
           dispatch(handleSlNo({ no: parseInt(lastEntrySl) }));

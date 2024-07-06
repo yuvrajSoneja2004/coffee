@@ -19,12 +19,13 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { allData, blocks, treeList, typeofWork } from "@/lib/db";
+import { allData, blocks, filterOptions, treeList, typeofWork } from "@/lib/db";
 import { useAppSelector } from "@/redux/store";
 import axios from "axios";
 import { formatDate } from "@/lib/formatDate";
 import { handleReload } from "@/redux/features/authSlice";
 import { useDispatch } from "react-redux";
+import { ScrollArea } from "../ui/scroll-area";
 
 function InventoryDialogue() {
   const [material, setMaterial] = useState<string>("");
@@ -94,6 +95,16 @@ function InventoryDialogue() {
   const removeBracketsAndContent = (str: string) => {
     return str?.replace(/\[.*?\]/, "").trim();
   };
+
+  const handleInventoryFilter = async (filterOption: string) => {
+    try {
+      const { data } = await axios.get(
+        `/api/filterInventory?filterOption=${filterOption}`,
+      );
+    } catch (error) {
+      console.log(error);
+    }
+  };
   return (
     <Dialog open={open}>
       <div className="flex items-center justify-between">
@@ -106,6 +117,27 @@ function InventoryDialogue() {
             Add Data
           </Button>
         </DialogTrigger>
+        {/* Filter options  */}
+        <div>
+          <span>Filter by:</span>
+          <DropdownMenu>
+            <DropdownMenuTrigger className="ml-2">
+              <Button>None</Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              {/* {filterOptions.map((item, index) => {
+                return (
+                  <DropdownMenuItem
+                    key={index}
+                    onClick={() => handleInventoryFilter(item)}
+                  >
+                    {item}
+                  </DropdownMenuItem>
+                );
+              })} */}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
         <Button onClick={() => dispatch(handleReload(12))}>
           <RotateCcw size={16} />
         </Button>
@@ -116,7 +148,7 @@ function InventoryDialogue() {
             <div className="grid w-full grid-cols-2 gap-x-10 gap-y-4">
               <div>
                 <label htmlFor="Date">Date</label>
-                <Input className="mt-2" value={formatDate(new Date())} />
+                <Input className="mt-2" value={formatDate()} />
               </div>
               {/* Dropdown  */}
               <div>
@@ -166,21 +198,23 @@ function InventoryDialogue() {
                     />
                   </DropdownMenuTrigger>
                   <DropdownMenuContent>
-                    {materialList
-                      ?.slice(1)
-                      ?.map((subArray) => subArray[materialTypeIndex])
-                      .filter((item) => item !== "" && item !== undefined)
-                      .map((work, index) => (
-                        <DropdownMenuItem
-                          key={index}
-                          onClick={() => {
-                            setBaseItem(removeBracketsAndContent(work));
-                            setCurrentItemUnit(extractUnit(work) as string);
-                          }}
-                        >
-                          {removeBracketsAndContent(work)}
-                        </DropdownMenuItem>
-                      ))}
+                    <ScrollArea className="h-[200px] w-[150px] rounded-md border p-4">
+                      {materialList
+                        ?.slice(1)
+                        ?.map((subArray) => subArray[materialTypeIndex])
+                        .filter((item) => item !== "" && item !== undefined)
+                        .map((work, index) => (
+                          <DropdownMenuItem
+                            key={index}
+                            onClick={() => {
+                              setBaseItem(removeBracketsAndContent(work));
+                              setCurrentItemUnit(extractUnit(work) as string);
+                            }}
+                          >
+                            {removeBracketsAndContent(work)}
+                          </DropdownMenuItem>
+                        ))}
+                    </ScrollArea>
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>

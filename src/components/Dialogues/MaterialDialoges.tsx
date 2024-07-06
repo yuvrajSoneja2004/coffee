@@ -23,6 +23,7 @@ import { useAppSelector } from "@/redux/store";
 import axios from "axios";
 import { handleReload } from "@/redux/features/authSlice";
 import { useDispatch } from "react-redux";
+import { formatDate } from "@/lib/formatDate";
 
 function MaterialDialogue() {
   const [slNo, setSlNo] = useState("");
@@ -43,16 +44,9 @@ function MaterialDialogue() {
   );
   const [open, setOpen] = useState(false);
 
-  function formatDate(date: Date) {
-    const day = date.getDate().toString().padStart(2, "0");
-    const month = (date.getMonth() + 1).toString().padStart(2, "0");
-    const year = date.getFullYear().toString().slice(-2); // Getting last two digits of the year
-    return `${day}.${month}.${year}`;
-  }
-
   const deleteFromInventory = async () => {
     const payload = {
-      date: formatDate(new Date()),
+      date: formatDate(),
       material,
       baseMaterial,
       currentItemUnit,
@@ -72,10 +66,11 @@ function MaterialDialogue() {
 
       setOpen(false);
       const serverRes = await response.json();
-      if (serverRes?.msg === "ITEM_NOT_FOUND_ON_INVENTORY") {
-        alert("No such inventory");
-      } else if (serverRes?.msg === "NOT_ENOUGH_QTY") {
-        alert("Not enough Qty");
+      console.log(serverRes, "kuchc bhi");
+      if (serverRes?.msg === "INSUFFICIENT_MATERIALS") {
+        alert("Insufficient materials available in inventory");
+      } else if (serverRes?.msg === "BASEITEM_NOT_FOUND") {
+        alert("Enough baseItems not found");
       } else {
         handleSave();
       }
@@ -93,7 +88,7 @@ function MaterialDialogue() {
     // Construct your payload with the state values
     const payload = {
       slNo: slNoStarts,
-      date: formatDate(new Date()),
+      date: formatDate(),
       boughtIssuedBy,
       baseMaterial,
       singleUnit: currentItemUnit,
@@ -304,7 +299,6 @@ function MaterialDialogue() {
 
               <Button
                 onClick={() => {
-                  // handleSave();
                   deleteFromInventory();
                 }}
               >

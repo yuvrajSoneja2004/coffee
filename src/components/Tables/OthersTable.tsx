@@ -29,6 +29,7 @@ interface DailyWorkTableProps {
 export default function OthersTable({ sheetName }: DailyWorkTableProps) {
   const [headingRows, setHeadingRows] = useState<string[][]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [materialList, setMaterialList] = useState([]);
   const { name, role, reloadHandler } = useAppSelector(
     (state) => state.authSlice,
   );
@@ -57,6 +58,8 @@ export default function OthersTable({ sheetName }: DailyWorkTableProps) {
       setIsLoading(false);
     }
   };
+
+
 
   useEffect(() => {
     getData();

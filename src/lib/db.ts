@@ -1,3 +1,4 @@
+// ! NOT USING
 export const typeofWork = [
   "Nursery",
   "Field",
@@ -5,6 +6,7 @@ export const typeofWork = [
   "Processing",
   "Misc",
 ];
+// ! NOT USING
 export const treeList = [
   "Silver Oak",
   "Coffee",
@@ -14,6 +16,7 @@ export const treeList = [
   "Eucalyptus",
 ];
 
+// ! NOT USING
 export const allData = [
   [
     "Bed Preparation",
@@ -31,4 +34,11 @@ export const allData = [
   ["Coffee Processing", "Speciality Coffee Processing"],
   ["Construction", "Path Maintainance"],
 ];
+// ! NOT USING
 export const blocks = ["A", "B", "C", "D", "E", "X", "Y", "Z", "NRSRY"];
+
+// Filter options for inventory page
+export const filterOptions = {
+  Material: ["BaseMaterial", "Solutions", "Tools", "Consumables"],
+  BaseItem: [],
+};

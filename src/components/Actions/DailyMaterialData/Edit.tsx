@@ -94,9 +94,6 @@ function Edit({ isAllowed, data, rowIndex, sheetName }: any) {
       });
   };
 
-  useEffect(() => {
-    console.log(data, "huhuii");
-  }, []);
   return (
     <Dialog open={open}>
       <DialogTrigger>
