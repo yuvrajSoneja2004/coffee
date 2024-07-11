@@ -1,24 +1,7 @@
+import User from "@/models/user";
 import mongoose from "mongoose";
 import { NextResponse } from "next/server";
 import path from "path";
-
-const userSchema = new mongoose.Schema({
-  name: {
-    type: String,
-    required: true,
-  },
-  role: {
-    type: String,
-    required: true,
-  },
-  password: {
-    type: String,
-    required: true,
-  },
-});
-
-// Use model function correctly
-const User = mongoose.models.users || mongoose.model("users", userSchema);
 
 export const connectToDB = () => {
   mongoose
