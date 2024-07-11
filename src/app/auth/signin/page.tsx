@@ -49,7 +49,7 @@ const SignIn: React.FC = () => {
         // Store the JWT token
         localStorage.setItem("token", data.token);
         // that means user is successfully authenticated
-        dispatch(storeAuthInfo({ name: data?.name, role: data?.role }));
+        // dispatch(storeAuthInfo({ name: data?.name, role: data?.role }));
         router.push("/");
       }
     } catch (error) {

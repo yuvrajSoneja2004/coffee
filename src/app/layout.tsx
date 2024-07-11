@@ -7,34 +7,30 @@ import React, { useEffect, useState } from "react";
 import Loader from "@/components/common/Loader";
 import { ReduxProvider } from "@/redux/features/provider";
 import { Toaster } from "@/components/ui/toaster";
-import { useRouter } from "next/navigation";
+import CheckAuth from "@/wrappers/checkAuth";
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [loading, setLoading] = useState<boolean>(true);
-  const router = useRouter();
+const RootLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  // const [loading, setLoading] = useState(true);
+  // const router = useRouter();
 
-  // const pathname = usePathname();
-
-  useEffect(() => {
-    setTimeout(() => setLoading(false), 1000);
-    router.push("/auth/signin");
-  }, []);
+  // useEffect(() => {
+  //   setTimeout(() => setLoading(false), 1000);
+  //   router.push("/auth/signin"); // This will immediately redirect, ensure this is intended
+  // }, []);
 
   return (
-    <html lang="en">
-      <ReduxProvider>
-        <body suppressHydrationWarning={true}>
-          <div className="dark:bg-boxdark-2 dark:text-bodydark">
-            {loading ? <Loader /> : children}
-          </div>
+    <html>
+      <body>
+        <div className="dark:bg-boxdark-2 dark:text-bodydark">
+          <ReduxProvider>
+            <CheckAuth>{children}</CheckAuth>
+          </ReduxProvider>
+
           <Toaster />
-        </body>
-      </ReduxProvider>
+        </div>
+      </body>
     </html>
   );
-}
+};
+
+export default RootLayout;
