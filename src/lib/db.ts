@@ -38,7 +38,4 @@ export const allData = [
 export const blocks = ["A", "B", "C", "D", "E", "X", "Y", "Z", "NRSRY"];
 
 // Filter options for inventory page
-export const filterOptions = {
-  Material: ["BaseMaterial", "Solutions", "Tools", "Consumables"],
-  BaseItem: [],
-};
+export const units = ["GMS", "KGS", "LTR", "ML", "PC"];

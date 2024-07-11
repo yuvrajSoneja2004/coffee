@@ -20,6 +20,7 @@ import {
   handleSlNo,
   handleSlNoMaterial,
 } from "@/redux/features/authSlice";
+import { setMaterialList as reduxMaterialList } from "@/redux/features/inventoryFilter";
 import Edit from "../Actions/DailyMaterialData/Edit";
 
 interface DailyWorkTableProps {
@@ -29,9 +30,9 @@ interface DailyWorkTableProps {
 export default function OthersTable({ sheetName }: DailyWorkTableProps) {
   const [headingRows, setHeadingRows] = useState<string[][]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [materialList, setMaterialList] = useState([]);
-  const { name, role, reloadHandler } = useAppSelector(
-    (state) => state.authSlice,
+  const { role, reloadHandler } = useAppSelector((state) => state.authSlice);
+  const { materialListB, isFilterApplied } = useAppSelector(
+    (state) => state.inventoryFilter,
   );
   const dispatch = useDispatch();
 
@@ -42,7 +43,7 @@ export default function OthersTable({ sheetName }: DailyWorkTableProps) {
         `/api/googletest?sheetName=${sheetName}`,
       );
       console.log(data);
-      if ((sheetName = "Daily Work Data")) {
+      if (sheetName === "Daily Work Data") {
         dispatch(handleSlNo({ no: data?.length - 1 }));
       }
 
@@ -52,6 +53,9 @@ export default function OthersTable({ sheetName }: DailyWorkTableProps) {
       }
 
       setHeadingRows(data);
+      if (!isFilterApplied) {
+        dispatch(reduxMaterialList(data));
+      }
     } catch (error) {
       console.log(error);
     } finally {
@@ -59,14 +63,15 @@ export default function OthersTable({ sheetName }: DailyWorkTableProps) {
     }
   };
 
-
-
   useEffect(() => {
     getData();
   }, [reloadHandler]);
 
   if (isLoading) return <Loader additionalStyles="mt-5" />;
   if (headingRows.length === 1) return <NoInfoFound />;
+
+  const dataToRender =
+    sheetName === "INVENTORY" ? materialListB : headingRows.slice(1);
 
   return (
     <Table className="border-stroke px-7.5 dark:border-strokedark dark:bg-boxdark mt-6 rounded-md border bg-white py-6 shadow-default">
@@ -88,7 +93,7 @@ export default function OthersTable({ sheetName }: DailyWorkTableProps) {
       </TableHeader>
       <TableBody>
         {/* Render table rows */}
-        {headingRows.slice(1).map((row, rowIndex) => (
+        {dataToRender?.map((row, rowIndex) => (
           <TableRow key={rowIndex}>
             {row.map((cell, cellIndex) => {
               if (sheetName && cellIndex === row.length - 1) {
@@ -103,28 +108,12 @@ export default function OthersTable({ sheetName }: DailyWorkTableProps) {
                           isAllowed={role === "Admin"}
                           sheetName={sheetName}
                         />
-                        {sheetName === "DAILY WORK DATA" ? (
-                          <Edit
-                            isAllowed={role === "Admin"}
-                            data={row}
-                            rowIndex={rowIndex}
-                            sheetName={sheetName}
-                          />
-                        ) : sheetName === "MATERIALS" ? (
-                          <Edit
-                            isAllowed={role === "Admin"}
-                            data={row}
-                            rowIndex={rowIndex}
-                            sheetName={sheetName}
-                          />
-                        ) : (
-                          <Edit
-                            isAllowed={role === "Admin"}
-                            data={row}
-                            rowIndex={rowIndex}
-                            sheetName={sheetName}
-                          />
-                        )}
+                        <Edit
+                          isAllowed={role === "Admin"}
+                          data={row}
+                          rowIndex={rowIndex}
+                          sheetName={sheetName}
+                        />
                       </div>
                     </TableCell>
                   </React.Fragment>

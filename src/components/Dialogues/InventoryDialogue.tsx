@@ -19,14 +19,12 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { allData, blocks, filterOptions, treeList, typeofWork } from "@/lib/db";
 import { useAppSelector } from "@/redux/store";
 import axios from "axios";
 import { formatDate } from "@/lib/formatDate";
 import { handleReload } from "@/redux/features/authSlice";
 import { useDispatch } from "react-redux";
 import { ScrollArea } from "../ui/scroll-area";
-
 function InventoryDialogue() {
   const [material, setMaterial] = useState<string>("");
   const [materialList, setMaterialList] = useState([]);
@@ -77,8 +75,8 @@ function InventoryDialogue() {
           `/api/getFields?sheetName=LIST AND OPTIONS`,
         );
         // Extracting all materials list from res
-        setMaterialList(data);
-        // console.log("Inventory res", items);
+        // setMaterialList(data);
+        console.log("Inventory res", data);
       } catch (error) {
         console.log(error);
       }
@@ -118,26 +116,6 @@ function InventoryDialogue() {
           </Button>
         </DialogTrigger>
         {/* Filter options  */}
-        <div>
-          <span>Filter by:</span>
-          <DropdownMenu>
-            <DropdownMenuTrigger className="ml-2">
-              <Button>None</Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent>
-              {/* {filterOptions.map((item, index) => {
-                return (
-                  <DropdownMenuItem
-                    key={index}
-                    onClick={() => handleInventoryFilter(item)}
-                  >
-                    {item}
-                  </DropdownMenuItem>
-                );
-              })} */}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
         <Button onClick={() => dispatch(handleReload(12))}>
           <RotateCcw size={16} />
         </Button>
