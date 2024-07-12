@@ -1,10 +1,10 @@
 "use client";
+
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
-  DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
 import React, { useEffect, useState } from "react";
@@ -15,8 +15,6 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useAppSelector } from "@/redux/store";
@@ -25,6 +23,7 @@ import { useDispatch } from "react-redux";
 import { handleReload } from "@/redux/features/authSlice";
 import { useToast } from "../ui/use-toast";
 import { formatDate } from "@/lib/formatDate";
+import { useForm, Controller } from "react-hook-form";
 
 function DailyWorkDataDialogue() {
   const { toast } = useToast();
@@ -34,41 +33,42 @@ function DailyWorkDataDialogue() {
   const [materialTypeIndex, setMaterialTypeIndex] = useState<number>(0);
   const [singleDetailOfWork, setSingleDetailOfWork] = useState("");
   const [treeListValue, setTreeListValue] = useState("");
-  const [maleLabourCount, setMaleLabourCount] = useState("");
-  const [femaleLabourCount, setFemaleLabourCount] = useState("");
   const [block, setBlock] = useState("");
-  const [rowFrom, setRowFrom] = useState("");
-  const [rowTo, setRowTo] = useState("");
-  const [treeCount, setTreeCount] = useState("");
   const { slNoStarts } = useAppSelector((state) => state.authSlice);
   const [open, setOpen] = useState(false);
 
   const dispatch = useDispatch();
-  // function formatDate(date: Date) {
-  //   const day = date.getDate().toString().padStart(2, "0");
-  //   const month = (date.getMonth() + 1).toString().padStart(2, "0");
-  //   const year = date.getFullYear().toString().slice(-2); // Getting last two digits of the year
-  //   return `${day}.${month}.${year}`;
-  // }
 
-  const handleSave = (hasToReload: boolean) => {
-    // Construct your payload with the state values
+  const {
+    control,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm({
+    defaultValues: {
+      maleLabourCount: "",
+      femaleLabourCount: "",
+      rowFrom: "",
+      rowTo: "",
+      treeCount: "",
+    },
+  });
+
+  const handleSave = (data, hasToReload) => {
     const payload = {
       slNo: slNoStarts,
       date: formatDate(),
-      // date: formatDate(new Date()),
       material,
       singleDetailOfWork,
       treeListValue,
-      maleLabourCount,
-      femaleLabourCount,
+      maleLabourCount: data.maleLabourCount,
+      femaleLabourCount: data.femaleLabourCount,
       block,
-      rowFrom,
-      rowTo,
-      treeCount,
+      rowFrom: data.rowFrom,
+      rowTo: data.rowTo,
+      treeCount: data.treeCount,
     };
 
-    // Send HTTP request to the server
     fetch("/api/googletest", {
       method: "POST",
       headers: {
@@ -81,16 +81,7 @@ function DailyWorkDataDialogue() {
           if (hasToReload) {
             setOpen(false);
             dispatch(handleReload(12));
-            // reset all the states
-            setMaterial("");
-            setSingleDetailOfWork("");
-            setTreeListValue("");
-            setMaleLabourCount("");
-            setFemaleLabourCount("");
-            setBlock("");
-            setRowFrom("");
-            setRowTo("");
-            setTreeCount("");
+            resetForm();
           }
           console.log("Data saved successfully!");
         } else {
@@ -102,23 +93,21 @@ function DailyWorkDataDialogue() {
       });
   };
 
-  const handleSaveAndAddMore = (hasToReload: boolean) => {
-    handleSave(hasToReload);
+  const handleSaveAndAddMore = (data) => {
+    handleSave(data, false);
     toast({
-      title: "Successfuly Saved Daily Work Data Info.",
+      title: "Successfully Saved Daily Work Data Info.",
     });
     setOpen(true);
+    resetForm();
+  };
 
-    // reset all the states
+  const resetForm = () => {
     setMaterial("");
     setSingleDetailOfWork("");
     setTreeListValue("");
-    setMaleLabourCount("");
-    setFemaleLabourCount("");
     setBlock("");
-    setRowFrom("");
-    setRowTo("");
-    setTreeCount("");
+    reset();
   };
 
   useEffect(() => {
@@ -127,10 +116,8 @@ function DailyWorkDataDialogue() {
         const { data } = await axios.get(
           `/api/getFields?sheetName=LIST AND OPTIONS A`,
         );
-        // Extracting all materials list from res
         setMaterialList(data);
         console.log(data);
-        // console.log("Inventory res", items);
       } catch (error) {
         console.log(error);
       }
@@ -157,181 +144,235 @@ function DailyWorkDataDialogue() {
       <DialogContent className="" onInteractOutside={() => setOpen(false)}>
         <DialogHeader>
           <DialogDescription className="">
-            <div className="grid w-full grid-cols-2 gap-x-10 gap-y-4">
-              <div>
-                <label htmlFor="SL.No.">SL.No</label>
-                <Input className="mt-2" value={slNoStarts} />
+            <form onSubmit={handleSubmit((data) => handleSave(data, true))}>
+              <div className="grid w-full grid-cols-2 gap-x-10 gap-y-4">
+                <div>
+                  <label htmlFor="SL.No.">SL.No</label>
+                  <Input className="mt-2" value={slNoStarts} readOnly />
+                </div>
+                <div>
+                  <label htmlFor="Date">Date</label>
+                  <Input className="mt-2" value={formatDate()} readOnly />
+                </div>
+                <div className="mt-2">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger className="flex w-full cursor-pointer flex-col items-start">
+                      <label htmlFor="">Type of Work</label>
+                      <Input
+                        className="mt-2"
+                        value={material}
+                        placeholder={material}
+                        readOnly
+                      />
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent>
+                      {materialList
+                        ?.slice(1)
+                        ?.map((subArray) => subArray[0])
+                        .filter((item) => item !== "" && item !== undefined)
+                        .map((work, index) => (
+                          <DropdownMenuItem
+                            key={index}
+                            onClick={() => {
+                              setMaterial(work);
+                              setMaterialTypeIndex(index + 1);
+                            }}
+                          >
+                            {work}
+                          </DropdownMenuItem>
+                        ))}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+                <div className="mt-2">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger className="flex w-full flex-col items-start">
+                      <label htmlFor="">Details of work done</label>
+                      <Input
+                        className="mt-2"
+                        placeholder="Select Details of Work Done"
+                        value={singleDetailOfWork}
+                        readOnly
+                      />
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent>
+                      {materialList
+                        ?.slice(1)
+                        ?.map((subArray) => subArray[materialTypeIndex])
+                        .filter((item) => item !== "" && item !== undefined)
+                        .map((work, index) => (
+                          <DropdownMenuItem
+                            key={index}
+                            onClick={() => {
+                              setSingleDetailOfWork(work);
+                            }}
+                          >
+                            {work}
+                          </DropdownMenuItem>
+                        ))}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+                <div className="mt-2">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger className="flex w-full flex-col items-start">
+                      <label htmlFor="">TreeList</label>
+                      <Input
+                        className="mt-2"
+                        placeholder="Select Tree List"
+                        value={treeListValue}
+                        readOnly
+                      />
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent>
+                      {materialList
+                        ?.slice(1)
+                        ?.map((subArray) => subArray[6])
+                        .filter((item) => item !== "" && item !== undefined)
+                        .map((work, index) => (
+                          <DropdownMenuItem
+                            key={index}
+                            onClick={() => {
+                              setTreeListValue(work);
+                            }}
+                          >
+                            {work}
+                          </DropdownMenuItem>
+                        ))}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+                <div className="mt-2">
+                  <label htmlFor="maleLabourCount">Male Labour Count</label>
+                  <Controller
+                    name="maleLabourCount"
+                    control={control}
+                    rules={{
+                      required: "This field is required",
+                      pattern: {
+                        value: /^\d+$/,
+                        message: "Please enter a valid number",
+                      },
+                    }}
+                    render={({ field }) => (
+                      <Input className="mt-2" type="number" {...field} />
+                    )}
+                  />
+                  {errors.maleLabourCount && (
+                    <p className="text-red-500">
+                      {errors.maleLabourCount.message}
+                    </p>
+                  )}
+                </div>
+                <div className="mt-2">
+                  <label htmlFor="femaleLabourCount">Female Labour Count</label>
+                  <Controller
+                    name="femaleLabourCount"
+                    control={control}
+                    rules={{
+                      required: "This field is required",
+                      pattern: {
+                        value: /^\d+$/,
+                        message: "Please enter a valid number",
+                      },
+                    }}
+                    render={({ field }) => (
+                      <Input className="mt-2" type="number" {...field} />
+                    )}
+                  />
+                  {errors.femaleLabourCount && (
+                    <p className="text-red-500">
+                      {errors.femaleLabourCount.message}
+                    </p>
+                  )}
+                </div>
+                <div className="mt-2">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger className="flex w-full flex-col items-start">
+                      <label htmlFor="">Block</label>
+                      <Input
+                        className="mt-2"
+                        value={block}
+                        placeholder="Select Block"
+                        readOnly
+                      />
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent>
+                      {materialList
+                        ?.slice(1)
+                        ?.map((subArray) => subArray[7])
+                        .filter((item) => item !== "" && item !== undefined)
+                        .map((work, index) => (
+                          <DropdownMenuItem
+                            key={index}
+                            onClick={() => {
+                              setBlock(work);
+                            }}
+                          >
+                            {work}
+                          </DropdownMenuItem>
+                        ))}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+                <div className="mt-2">
+                  <label htmlFor="rowFrom">Row from</label>
+                  <Controller
+                    name="rowFrom"
+                    control={control}
+                    rules={{ required: "This field is required" }}
+                    render={({ field }) => (
+                      <Input className="mt-2" {...field} />
+                    )}
+                  />
+                  {errors.rowFrom && (
+                    <p className="text-red-500">{errors.rowFrom.message}</p>
+                  )}
+                </div>
+                <div className="mt-2">
+                  <label htmlFor="rowTo">Row to</label>
+                  <Controller
+                    name="rowTo"
+                    control={control}
+                    rules={{ required: "This field is required" }}
+                    render={({ field }) => (
+                      <Input className="mt-2" {...field} />
+                    )}
+                  />
+                  {errors.rowTo && (
+                    <p className="text-red-500">{errors.rowTo.message}</p>
+                  )}
+                </div>
+                <div className="mt-2">
+                  <label htmlFor="treeCount">Tree Count</label>
+                  <Controller
+                    name="treeCount"
+                    control={control}
+                    rules={{
+                      required: "This field is required",
+                      pattern: {
+                        value: /^\d+$/,
+                        message: "Please enter a valid number",
+                      },
+                    }}
+                    render={({ field }) => (
+                      <Input className="mt-2" {...field} />
+                    )}
+                  />
+                  {errors.treeCount && (
+                    <p className="text-red-500">{errors.treeCount.message}</p>
+                  )}
+                </div>
+                <div className="mt-2"></div>
+                <Button type="submit">Save Data</Button>
+                <Button
+                  type="button"
+                  onClick={handleSubmit(handleSaveAndAddMore)}
+                >
+                  Save & Add More
+                </Button>
               </div>
-              <div>
-                <label htmlFor="Date">Date</label>
-                <Input className="mt-2" value={formatDate()} />
-              </div>
-              {/* Dropdown  */}
-              <div className="mt-2">
-                <DropdownMenu>
-                  <DropdownMenuTrigger className="flex w-full cursor-pointer flex-col items-start">
-                    <label htmlFor="">Type of Work</label>
-                    <Input
-                      className="mt-2"
-                      value={material}
-                      placeholder={material}
-                      readOnly
-                    />
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent>
-                    {materialList
-                      ?.slice(1)
-                      ?.map((subArray) => subArray[0])
-                      .filter((item) => item !== "" && item !== undefined)
-                      .map((work, index) => (
-                        <DropdownMenuItem
-                          key={index}
-                          onClick={() => {
-                            setMaterial(work);
-                            setMaterialTypeIndex(index + 1);
-                          }}
-                        >
-                          {work}
-                        </DropdownMenuItem>
-                      ))}
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-              <div className="mt-2">
-                <DropdownMenu>
-                  <DropdownMenuTrigger className="flex w-full flex-col items-start">
-                    <label htmlFor="">Details of work done</label>
-                    <Input
-                      className="mt-2"
-                      placeholder="Select Details of Work Done"
-                      value={singleDetailOfWork}
-                      readOnly
-                    />
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent>
-                    {materialList
-                      ?.slice(1)
-                      ?.map((subArray) => subArray[materialTypeIndex])
-                      .filter((item) => item !== "" && item !== undefined)
-                      .map((work, index) => (
-                        <DropdownMenuItem
-                          key={index}
-                          onClick={() => {
-                            setSingleDetailOfWork(work);
-                          }}
-                        >
-                          {work}
-                        </DropdownMenuItem>
-                      ))}
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-              <div className="mt-2">
-                <DropdownMenu>
-                  <DropdownMenuTrigger className="flex w-full flex-col items-start">
-                    <label htmlFor="">TreeList</label>
-                    <Input
-                      className="mt-2"
-                      placeholder="Select Tree List"
-                      value={treeListValue}
-                      readOnly
-                    />
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent>
-                    {materialList
-                      ?.slice(1)
-                      ?.map((subArray) => subArray[6])
-                      .filter((item) => item !== "" && item !== undefined)
-                      .map((work, index) => (
-                        <DropdownMenuItem
-                          key={index}
-                          onClick={() => {
-                            setTreeListValue(work);
-                          }}
-                        >
-                          {work}
-                        </DropdownMenuItem>
-                      ))}
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-              <div className="mt-2">
-                <label htmlFor="SL.No.">Male Labour Count</label>
-                <Input
-                  className="mt-2"
-                  type="number"
-                  value={maleLabourCount}
-                  onChange={(e) => setMaleLabourCount(e.target.value)}
-                />
-              </div>
-              <div className="mt-2">
-                <label htmlFor="SL.No.">Female Labour Count</label>
-                <Input
-                  className="mt-2"
-                  type="number"
-                  value={femaleLabourCount}
-                  onChange={(e) => setFemaleLabourCount(e.target.value)}
-                />
-              </div>
-              <div className="mt-2">
-                <DropdownMenu>
-                  <DropdownMenuTrigger className="flex w-full flex-col items-start">
-                    <label htmlFor="">Block</label>
-                    <Input
-                      className="mt-2"
-                      value={block}
-                      placeholder="Select Block"
-                      readOnly
-                    />
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent>
-                    {materialList
-                      ?.slice(1)
-                      ?.map((subArray) => subArray[7])
-                      .filter((item) => item !== "" && item !== undefined)
-                      .map((work, index) => (
-                        <DropdownMenuItem
-                          key={index}
-                          onClick={() => {
-                            setBlock(work);
-                          }}
-                        >
-                          {work}
-                        </DropdownMenuItem>
-                      ))}
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-              <div className="mt-2">
-                <label htmlFor="SL.No.">Row from</label>
-                <Input
-                  className="mt-2"
-                  value={rowFrom}
-                  onChange={(e) => setRowFrom(e.target.value)}
-                />
-              </div>
-              <div className="mt-2">
-                <label htmlFor="SL.No.">Row to</label>
-                <Input
-                  className="mt-2"
-                  value={rowTo}
-                  onChange={(e) => setRowTo(e.target.value)}
-                />
-              </div>
-              <div className="mt-2">
-                <label htmlFor="SL.No.">Tree Count</label>
-                <Input
-                  className="mt-2"
-                  value={treeCount}
-                  onChange={(e) => setTreeCount(e.target.value)}
-                />
-              </div>
-              <div className="mt-2"></div>
-              <Button onClick={() => handleSave(true)}>Save Data</Button>
-              <Button onClick={() => handleSaveAndAddMore(false)}>
-                Save & Add More
-              </Button>
-            </div>
+            </form>
           </DialogDescription>
         </DialogHeader>
       </DialogContent>
