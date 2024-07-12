@@ -23,19 +23,23 @@ const SignIn: React.FC = () => {
   const handleSubmit = async (e: any) => {
     e.preventDefault();
     try {
-      const { data } = await axios.post("/api/linkSheet", {
-        name,
-        password,
-        sheetId,
-      });
+      if (name === "" || password === "" || sheetId === "") {
+        alert("Please fill all the fields");
+      } else {
+        const { data } = await axios.post("/api/linkSheet", {
+          name,
+          password,
+          sheetId,
+        });
 
-      console.log("Money heist", data);
-      if (data?.res) {
-        // Store the JWT token
-        localStorage.setItem("token", data.token);
-        // that means user is successfully authenticated
-        // dispatch(storeAuthInfo({ name: data?.name, role: data?.role }));
-        router.push("/");
+        console.log("Money heist", data);
+        if (data?.res) {
+          // Store the JWT token
+          localStorage.setItem("token", data.token);
+          // that means user is successfully authenticated
+          // dispatch(storeAuthInfo({ name: data?.name, role: data?.role }));
+          router.push("/");
+        }
       }
     } catch (error) {
       console.log(error);
@@ -71,18 +75,22 @@ const SignIn: React.FC = () => {
 
   const handleLogin = async () => {
     try {
-      const { data } = await axios.post("/api/userlogin", {
-        name,
-        password,
-      });
+      if (name === "" || password === "") {
+        alert("Please enter name and password");
+      } else {
+        const { data } = await axios.post("/api/userlogin", {
+          name,
+          password,
+        });
 
-      console.log("Money heist season 2", data);
-      if (data?.res) {
-        // Store the JWT token
-        localStorage.setItem("token", data.token);
-        // that means user is successfully authenticated
-        // dispatch(storeAuthInfo({ name: data?.name, role: data?.role }));
-        router.push("/");
+        console.log("Money heist season 2", data);
+        if (data?.res) {
+          // Store the JWT token
+          localStorage.setItem("token", data.token);
+          // that means user is successfully authenticated
+          // dispatch(storeAuthInfo({ name: data?.name, role: data?.role }));
+          router.push("/");
+        }
       }
     } catch (error) {
       console.log(error);

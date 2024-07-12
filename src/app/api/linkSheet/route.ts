@@ -100,9 +100,17 @@ export async function POST(req: Request) {
     // return NextResponse.json({ res: true });
   } catch (error) {
     console.log(error);
-    return NextResponse.json({
-      res: false,
-      msg: "Error processing the request",
-    });
+    if (error?.code === 11000) {
+      return NextResponse.json({
+        res: false,
+        msg: "Sheet with this ID already exists",
+      });
+    } else {
+      return NextResponse.json({
+        res: false,
+        msg: error,
+      });
+    }
+   
   }
 }

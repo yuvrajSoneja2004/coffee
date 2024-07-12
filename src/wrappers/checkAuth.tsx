@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { usePathname } from "next/navigation";
 import { useDispatch } from "react-redux";
 import { storeAuthInfo } from "../redux/features/authSlice";
+import axios from "axios";
 
 interface Props {
   children: React.ReactNode;
@@ -15,6 +16,26 @@ const CheckAuth: React.FC<Props> = ({ children }) => {
   const router = useRouter();
   const currentPathName = usePathname();
   const dispatch = useDispatch();
+
+  const fetchCurrentUserData = async (userId: string) => {
+    try {
+      const { data } = await axios.get(`/api/getCurrentUser?userId=${userId}`);
+      console.log(data);
+      // Destructuring fields from data
+      const { name, role, sheetId, subsheetsIds } = data;
+      dispatch(
+        storeAuthInfo({
+          name,
+          role,
+          sheetId,
+          subsheetsIds,
+        }),
+      );
+    } catch (error) {
+      console.log(error);
+      alert("Error on checkAuth line 26");
+    }
+  };
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -29,16 +50,12 @@ const CheckAuth: React.FC<Props> = ({ children }) => {
       try {
         const decodedToken: any = jwtDecode(token);
         console.log(decodedToken);
+
         const currentTime = Date.now() / 1000;
 
         if (decodedToken.exp > currentTime) {
           setIsAuthenticated(true);
-          dispatch(
-            storeAuthInfo({
-              name: decodedToken?.name,
-              role: decodedToken?.role,
-            }),
-          );
+          await fetchCurrentUserData(decodedToken?.userId);
           setLoading(false);
         } else {
           localStorage.removeItem("token");

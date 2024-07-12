@@ -13,10 +13,10 @@ interface RowData {
 interface CategorizedData {
   [date: string]: RowData[];
 }
+// const spreadsheetId = "1yxSl2Q_yEa-C3IjJa4MguYHd9wmnlElnJ3aaUI3MWSM";
 
-async function WriteToSheet(values: any) {
+async function WriteToSheet(values: any , spreadsheetId:string) {
   const sheets = google.sheets({ version: "v4", auth });
-  const spreadsheetId = "1yxSl2Q_yEa-C3IjJa4MguYHd9wmnlElnJ3aaUI3MWSM";
   const range = "DAILY WORK DATA";
   const valueInputOption = "USER_ENTERED";
   const resource = { values };
@@ -36,56 +36,40 @@ async function WriteToSheet(values: any) {
   }
 }
 
-export async function readSheet(sheetName: string) {
+export async function readSheet(sheetName: string , spreadsheetId:string) {
   const sheets = google.sheets({ version: "v4", auth });
-  const spreadsheetId = "1yxSl2Q_yEa-C3IjJa4MguYHd9wmnlElnJ3aaUI3MWSM";
   const range = `${!sheetName ? "Sheet1" : sheetName}!A1:Z`;
+
+  console.log(sheetName , spreadsheetId)
 
   try {
     const response = await sheets.spreadsheets.values.get({
       spreadsheetId,
       range,
     });
-    const rows = response.data.values;
+    console.log("OSiakdos" , response)
+    // const rows = response.data.values;
 
     // Check if rows is empty
-    if (!rows || rows.length === 0) {
-      return "EMPTY";
-    }
+    // if (!rows || rows.length === 0) {
+    //   return "EMPTY";
+    // }
 
-    return rows;
+    // return rows;
   } catch (error) {
     console.log("Error while reading the sheet data", error);
   }
 }
 
-// export async function deleteRow(sheetName: string, rowIndex: number) {
-//   const sheets = google.sheets({ version: "v4", auth });
-//   const spreadsheetId = "1yxSl2Q_yEa-C3IjJa4MguYHd9wmnlElnJ3aaUI3MWSM";
-//   const range = `${sheetName}!${rowIndex}:${rowIndex}`;
-
-//   try {
-//     const res = await sheets.spreadsheets.values.clear({
-//       spreadsheetId,
-//       range,
-//     });
-//     return res;
-//   } catch (error) {
-//     console.error("Error deleting row:", error);
-//     throw error;
-//   }
-// }
-
-export async function deleteRow(sheetName: string, rowIndex: number) {
+export async function deleteRow(sheetName: string, rowIndex: number, spreadsheetId:string , subSheetId:string) {
   const sheets = google.sheets({ version: "v4", auth });
-  const spreadsheetId = "1yxSl2Q_yEa-C3IjJa4MguYHd9wmnlElnJ3aaUI3MWSM";
   const range = `${sheetName}!${rowIndex}:${rowIndex}`;
   const requestBody = {
     requests: [
       {
         deleteDimension: {
           range: {
-            sheetId: sheedIds[sheetName],
+            sheetId: subSheetId,
             dimension: "ROWS",
             startIndex: rowIndex - 1,
             endIndex: rowIndex, // Delete only one row
@@ -143,13 +127,18 @@ export async function GET(req: Request, res: Response) {
   try {
     const url = new URL(req.url);
     const sheetName = url.searchParams.get("sheetName")?.toString();
-    if (sheetName === undefined)
+    const spreadSheetId = url.searchParams.get("spreadSheetId")?.toString();
+    const subSheetId = url.searchParams.get("subSheetId")?.toString();
+    if (sheetName === undefined || spreadSheetId === undefined || subSheetId === undefined)
       return NextResponse.json({
         res: false,
-        msg: "Provide sheetName from client",
+        msg: "Provide sheetName , spreadsheetId and subSheetid from client",
       });
 
-    const sheetRes = await readSheet(sheetName);
+    console.log(sheetName, spreadSheetId, subSheetId);
+
+    const sheetRes = await readSheet(sheetName , spreadSheetId);
+console.log('i like it' , sheetRes)
 
     return NextResponse.json(sheetRes);
   } catch (error) {
@@ -159,6 +148,12 @@ export async function GET(req: Request, res: Response) {
 
 export async function POST(req: Request, res: Response) {
   try {
+    const url = new URL(req.url);
+    const spreadSheetId = url.searchParams.get("spreadSheetId")?.toString();
+    if(!spreadSheetId) return NextResponse.json({
+      res: false,
+      msg: "Provide spreadSheetId from client."
+    })
     const {
       slNo,
       date,
@@ -187,7 +182,9 @@ export async function POST(req: Request, res: Response) {
         rowTo,
         treeCount,
       ],
-    ]);
+    ],
+    spreadSheetId
+  );
   } catch (error) {
     console.log(error);
   }
@@ -196,9 +193,17 @@ export async function POST(req: Request, res: Response) {
 
 export async function PUT(req: Request, res: Response) {
   try {
+    const url = new URL(req.url);
+    const spreadSheetId = url.searchParams.get("spreadSheetId")?.toString();
+    const subSheetId = url.searchParams.get("subSheetId")?.toString();
+    if ( spreadSheetId === undefined || subSheetId === undefined)
+      return NextResponse.json({
+        res: false,
+        msg: "Provide spreadsheetId and subSheetid from client",
+      });
     try {
       const { sheetName, rowIndex } = await req.json(); // Assuming the request contains sheetName and rowIndex to delete
-      await deleteRow(sheetName, rowIndex);
+      await deleteRow(sheetName, rowIndex , spreadSheetId , subSheetId);
       console.log("Row deleted successfully.");
       return NextResponse.json({ success: true });
     } catch (error) {

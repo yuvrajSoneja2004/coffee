@@ -35,22 +35,16 @@ function DailyWorkTable({ sheetName }: DailyWorkTableProps) {
   const [categorizedData, setCategorizedData] = useState<CategorizedData>({});
   const [headers, setHeaders] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const { name, role, reloadHandler } = useAppSelector(
+  const { name, role, reloadHandler, sheetId, subsheetsIds } = useAppSelector(
     (state) => state.authSlice,
   );
   const dispatch = useDispatch();
 
-  // function formatDate(date: Date) {
-  //   const day = date.getDate().toString().padStart(2, "0");
-  //   const month = (date.getMonth() + 1).toString().padStart(2, "0");
-  //   const year = date.getFullYear().toString().slice(-2); // Getting last two digits of the year
-  //   return `${day}.${month}.${year}`;
-  // }
   const getData = async () => {
     setIsLoading(true);
     try {
       const { data } = await axios.get(
-        `/api/googletest?sheetName=${sheetName}`,
+        `/api/googletest?sheetName=${sheetName}&spreadSheetId=${sheetId}&subSheetId=${subsheetsIds[sheetName]}`,
       );
 
       const [headerRow, ...dataRows] = data;

@@ -1,10 +1,10 @@
 "use client";
+
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
-  DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
 import React, { useEffect, useState } from "react";
@@ -15,8 +15,6 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useAppSelector } from "@/redux/store";
@@ -24,38 +22,79 @@ import axios from "axios";
 import { handleReload } from "@/redux/features/authSlice";
 import { useDispatch } from "react-redux";
 import { formatDate } from "@/lib/formatDate";
+import { useForm, Controller } from "react-hook-form";
 
 function MaterialDialogue() {
-  const [slNo, setSlNo] = useState("");
   const [material, setMaterial] = useState<string>("");
   const [materialList, setMaterialList] = useState([]);
-  const [boughtIssuedBy, setBoughtIssuedBy] = useState("");
   const [baseMaterial, setBaseMaterial] = useState("");
-  const [singleUnit, setSingleUnit] = useState("");
-  const [qtyType, setQtyType] = useState<"in" | "out">("in");
-  const [qty, setQty] = useState("");
-  const [remarks, setRemarks] = useState("");
   const [materialTypeIndex, setMaterialTypeIndex] = useState<number>(0);
   const [currentItemUnit, setCurrentItemUnit] = useState("");
+  const [formErrors, setFormErrors] = useState({
+    material: "",
+    baseMaterial: "",
+    currentItemUnit: "",
+  });
   const dispatch = useDispatch();
 
-  const { slNoMaterial, slNoStarts } = useAppSelector(
-    (state) => state.authSlice,
-  );
+  const { slNoStarts } = useAppSelector((state) => state.authSlice);
+  const porn  = useAppSelector((state) => state.authSlice);
   const [open, setOpen] = useState(false);
 
-  const deleteFromInventory = async () => {
+  const {
+    control,
+    handleSubmit,
+    watch,
+    setValue,
+    reset,
+    formState: { errors },
+  } = useForm({
+    defaultValues: {
+      boughtIssuedBy: "",
+      qtyType: "in",
+      qty: "",
+      remarks: "",
+    },
+  });
+
+  const qtyType = watch("qtyType");
+
+  const validateCustomFields = () => {
+    let isValid = true;
+    const newErrors = { material: "", baseMaterial: "", currentItemUnit: "" };
+
+    if (material === "") {
+      newErrors.material = "Material is required";
+      isValid = false;
+    }
+    if (baseMaterial === "") {
+      newErrors.baseMaterial = "Base material is required";
+      isValid = false;
+    }
+    if (currentItemUnit === "") {
+      newErrors.currentItemUnit = "Unit is required";
+      isValid = false;
+    }
+
+    setFormErrors(newErrors);
+    return isValid;
+  };
+
+  const deleteFromInventory = async (data) => {
+    if (!validateCustomFields()) {
+      return;
+    }
+
     const payload = {
       date: formatDate(),
       material,
       baseMaterial,
       currentItemUnit,
-      qtyType,
-      qty: qty,
+      qtyType: data.qtyType,
+      qty: data.qty,
     };
 
     try {
-      // Send HTTP request to the server
       const response = await fetch("/api/deleteFromInventory", {
         method: "POST",
         headers: {
@@ -66,13 +105,12 @@ function MaterialDialogue() {
 
       setOpen(false);
       const serverRes = await response.json();
-      console.log(serverRes, "kuchc bhi");
       if (serverRes?.msg === "INSUFFICIENT_MATERIALS") {
         alert("Insufficient materials available in inventory");
       } else if (serverRes?.msg === "BASEITEM_NOT_FOUND") {
         alert("Enough baseItems not found");
       } else {
-        handleSave();
+        handleSave(data);
       }
       if (response.ok) {
         console.log("Data saved successfully!");
@@ -84,21 +122,19 @@ function MaterialDialogue() {
     }
   };
 
-  const handleSave = async () => {
-    // Construct your payload with the state values
+  const handleSave = async (data) => {
     const payload = {
       slNo: slNoStarts,
       date: formatDate(),
-      boughtIssuedBy,
+      boughtIssuedBy: data.boughtIssuedBy,
       baseMaterial,
       singleUnit: currentItemUnit,
-      inQty: qtyType === "in" ? qty : "",
-      outQty: qtyType === "out" ? qty : "",
-      remarks,
+      inQty: data.qtyType === "in" ? data.qty : "",
+      outQty: data.qtyType === "out" ? data.qty : "",
+      remarks: data.remarks,
     };
 
     try {
-      // Send HTTP request to the server
       const response = await fetch("/api/googlematerial", {
         method: "POST",
         headers: {
@@ -112,6 +148,11 @@ function MaterialDialogue() {
 
       if (response.ok) {
         console.log("Data saved successfully!");
+        reset();
+        setMaterial("");
+        setBaseMaterial("");
+        setCurrentItemUnit("");
+        setFormErrors({ material: "", baseMaterial: "", currentItemUnit: "" });
       } else {
         throw new Error("Failed to save data");
       }
@@ -126,9 +167,7 @@ function MaterialDialogue() {
         const { data } = await axios.get(
           `/api/getFields?sheetName=LIST AND OPTIONS`,
         );
-        // Extracting all materials list from res
         setMaterialList(data);
-        // console.log("Inventory res", items);
       } catch (error) {
         console.log(error);
       }
@@ -136,7 +175,6 @@ function MaterialDialogue() {
     getFieldsData();
   }, []);
 
-  // Utility functions to extract data using regex
   const extractUnit = (str: string) => {
     const match = str.match(/\[(.*?)\]/);
     return match ? match[1] : null;
@@ -146,6 +184,7 @@ function MaterialDialogue() {
     return str?.replace(/\[.*?\]/, "").trim();
   };
 
+  console.log(porn , 'its like pron')
   return (
     <Dialog open={open}>
       <div className="flex items-center justify-between">
@@ -165,146 +204,205 @@ function MaterialDialogue() {
       <DialogContent className="" onInteractOutside={() => setOpen(false)}>
         <DialogHeader>
           <DialogDescription className="">
-            <div className="grid w-full grid-cols-2 gap-x-10 gap-y-4">
-              <div>
-                <label htmlFor="SL.No.">SL.No</label>
-                <Input className="mt-2" value={slNoStarts} />
-              </div>
-              <div className="">
-                <label htmlFor="Date">Date</label>
-                <Input className="mt-2" value={formatDate(new Date())} />
-              </div>
-              <div className="mt-2">
-                <label htmlFor="SL.No.">Bought/ Issued By</label>
-                <Input
-                  className="mt-2"
-                  type="text"
-                  value={boughtIssuedBy}
-                  onChange={(e) => setBoughtIssuedBy(e.target.value)}
-                />
-              </div>
-              <div>
-                <DropdownMenu>
-                  <DropdownMenuTrigger className="flex w-full cursor-pointer flex-col items-start">
-                    <label htmlFor="">Material</label>
-                    <Input
-                      className="mt-2"
-                      value={material}
-                      placeholder={material}
-                    />
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent>
-                    {materialList
-                      ?.slice(1)
-                      ?.map((subArray) => subArray[0])
-                      .filter((item) => item !== "")
-                      .map((work, index) => (
-                        <DropdownMenuItem
-                          key={index}
-                          onClick={() => {
-                            setMaterial(work);
-                            setMaterialTypeIndex(index + 1);
-                          }}
-                        >
-                          {work}
-                        </DropdownMenuItem>
-                      ))}
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-              {/* Baseitem field  */}
-              <div className="mt-2">
-                <DropdownMenu>
-                  <DropdownMenuTrigger
-                    className="flex w-full flex-col items-start"
-                    disabled={material === ""}
-                  >
-                    <label htmlFor="">
-                      {material === "" ? "Select material type" : material}
-                    </label>
-                    <Input
-                      className="mt-2"
-                      placeholder={baseMaterial}
-                      value={baseMaterial}
+            <form onSubmit={handleSubmit(deleteFromInventory)}>
+              <div className="grid w-full grid-cols-2 gap-x-10 gap-y-4">
+                <div>
+                  <label htmlFor="SL.No.">SL.No</label>
+                  <Input className="mt-2" value={slNoStarts} readOnly />
+                </div>
+                <div className="">
+                  <label htmlFor="Date">Date</label>
+                  <Input className="mt-2" value={formatDate()} readOnly />
+                </div>
+                <div className="mt-2">
+                  <label htmlFor="boughtIssuedBy">Bought/ Issued By</label>
+                  <Controller
+                    name="boughtIssuedBy"
+                    control={control}
+                    rules={{ required: "This field is required" }}
+                    render={({ field }) => (
+                      <Input className="mt-2" {...field} />
+                    )}
+                  />
+                  {errors.boughtIssuedBy && (
+                    <p className="text-red-500">
+                      {errors.boughtIssuedBy.message}
+                    </p>
+                  )}
+                </div>
+                <div>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger className="flex w-full cursor-pointer flex-col items-start">
+                      <label htmlFor="">Material</label>
+                      <Input
+                        className="mt-2"
+                        value={material}
+                        placeholder={material || "Select Material"}
+                        readOnly
+                      />
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent>
+                      {materialList
+                        ?.slice(1)
+                        ?.map((subArray) => subArray[0])
+                        .filter((item) => item !== "")
+                        .map((work, index) => (
+                          <DropdownMenuItem
+                            key={index}
+                            onClick={() => {
+                              setMaterial(work);
+                              setMaterialTypeIndex(index + 1);
+                              setFormErrors((prev) => ({
+                                ...prev,
+                                material: "",
+                              }));
+                            }}
+                          >
+                            {work}
+                          </DropdownMenuItem>
+                        ))}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                  {formErrors.material && (
+                    <p className="text-red-500">{formErrors.material}</p>
+                  )}
+                </div>
+                <div className="mt-2">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger
+                      className="flex w-full flex-col items-start"
                       disabled={material === ""}
-                    />
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent>
-                    {materialList
-                      ?.slice(1)
-                      ?.map((subArray) => subArray[materialTypeIndex])
-                      .filter((item) => item !== "")
-                      .map((work, index) => (
-                        <DropdownMenuItem
-                          key={index}
-                          onClick={() => {
-                            setBaseMaterial(removeBracketsAndContent(work));
-                            setCurrentItemUnit(extractUnit(work) as string);
-                          }}
-                        >
-                          {removeBracketsAndContent(work)}
-                        </DropdownMenuItem>
-                      ))}
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-              <div className="mt-2">
-                <label htmlFor="">Unit</label>
-                <Input
-                  className="mt-2"
-                  placeholder={singleUnit}
-                  value={currentItemUnit}
-                />
-              </div>
-              <div className="mt-2 flex items-center justify-center">
-                <label htmlFor="inQty">IN Qty</label>
-                <Input
-                  className="ml-2 w-4"
-                  type="radio"
-                  value="in"
-                  checked={qtyType === "in"}
-                  onChange={() => setQtyType("in")}
-                  id="inQty"
-                />
-              </div>
-              <div className="mt-2 flex items-center justify-center">
-                <label htmlFor="outQty">OUT Qty</label>
-                <Input
-                  className="ml-2 w-4"
-                  type="radio"
-                  value="out"
-                  checked={qtyType === "out"}
-                  onChange={() => setQtyType("out")}
-                  id="outQty"
-                />
-              </div>
-              <div className="mt-2">
-                <label htmlFor="qty">Enter {qtyType.toUpperCase()} QTY</label>
-                <Input
-                  className="mt-2"
-                  value={qty}
-                  onChange={(e) => setQty(e.target.value)}
-                  id="qty"
-                />
-              </div>
-              <div className="mt-2">
-                <label htmlFor="remarks">Remarks</label>
-                <Input
-                  className="mt-2"
-                  value={remarks}
-                  onChange={(e) => setRemarks(e.target.value)}
-                  id="remarks"
-                />
-              </div>
+                    >
+                      <label htmlFor="">
+                        {material === "" ? "Select material type" : material}
+                      </label>
+                      <Input
+                        className="mt-2"
+                        placeholder={baseMaterial || "Select Base Material"}
+                        value={baseMaterial}
+                        disabled={material === ""}
+                        readOnly
+                      />
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent>
+                      {materialList
+                        ?.slice(1)
+                        ?.map((subArray) => subArray[materialTypeIndex])
+                        .filter((item) => item !== "")
+                        .map((work, index) => (
+                          <DropdownMenuItem
+                            key={index}
+                            onClick={() => {
+                              setBaseMaterial(removeBracketsAndContent(work));
+                              setCurrentItemUnit(extractUnit(work) as string);
+                              setFormErrors((prev) => ({
+                                ...prev,
+                                baseMaterial: "",
+                                currentItemUnit: "",
+                              }));
+                            }}
+                          >
+                            {removeBracketsAndContent(work)}
+                          </DropdownMenuItem>
+                        ))}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                  {formErrors.baseMaterial && (
+                    <p className="text-red-500">{formErrors.baseMaterial}</p>
+                  )}
+                </div>
+                <div className="mt-2">
+                  <label htmlFor="">Unit</label>
+                  <Input
+                    className="mt-2"
+                    placeholder={currentItemUnit || "Unit"}
+                    value={currentItemUnit}
+                    readOnly
+                  />
+                  {formErrors.currentItemUnit && (
+                    <p className="text-red-500">{formErrors.currentItemUnit}</p>
+                  )}
+                </div>
+                <div className="mt-2 flex items-center justify-center">
+                  <label htmlFor="inQty">IN Qty</label>
+                  <Controller
+                    name="qtyType"
+                    control={control}
+                    render={({ field }) => (
+                      <Input
+                        {...field}
+                        className="ml-2 w-4"
+                        type="radio"
+                        value="in"
+                        checked={field.value === "in"}
+                        onChange={() => setValue("qtyType", "in")}
+                        id="inQty"
+                      />
+                    )}
+                  />
+                </div>
+                <div className="mt-2 flex items-center justify-center">
+                  <label htmlFor="outQty">OUT Qty</label>
+                  <Controller
+                    name="qtyType"
+                    control={control}
+                    render={({ field }) => (
+                      <Input
+                        {...field}
+                        className="ml-2 w-4"
+                        type="radio"
+                        value="out"
+                        checked={field.value === "out"}
+                        onChange={() => setValue("qtyType", "out")}
+                        id="outQty"
+                      />
+                    )}
+                  />
+                </div>
+                <div className="mt-2">
+                  <label htmlFor="qty">Enter {qtyType.toUpperCase()} QTY</label>
+                  <Controller
+                    name="qty"
+                    control={control}
+                    rules={{
+                      required: "This field is required",
+                      pattern: {
+                        value: /^[0-9]+$/,
+                        message: "Please enter a valid number",
+                      },
+                    }}
+                    render={({ field }) => (
+                      <Input className="mt-2" {...field} />
+                    )}
+                  />
+                  {errors.qty && (
+                    <p className="text-red-500">{errors.qty.message}</p>
+                  )}
+                </div>
+                <div className="mt-2">
+                  <label htmlFor="remarks">Remarks</label>
+                  <Controller
+                    name="remarks"
+                    control={control}
+                    rules={{
+                      required: "This field is required",
+                      maxLength: {
+                        value: 200,
+                        message: "Remarks should not exceed 200 characters",
+                      },
+                    }}
+                    render={({ field }) => (
+                      <Input className="mt-2" {...field} />
+                    )}
+                  />
+                  {errors.remarks && (
+                    <p className="text-red-500">{errors.remarks.message}</p>
+                  )}
+                </div>
 
-              <Button
-                onClick={() => {
-                  deleteFromInventory();
-                }}
-              >
-                Save Data
-              </Button>
-            </div>
+                <Button type="submit">Save Data</Button>
+              </div>
+            </form>
           </DialogDescription>
         </DialogHeader>
       </DialogContent>

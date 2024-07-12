@@ -68,11 +68,13 @@ export default function OthersTable({ sheetName }: DailyWorkTableProps) {
   }, [reloadHandler]);
 
   if (isLoading) return <Loader additionalStyles="mt-5" />;
-  if (headingRows.length === 1) return <NoInfoFound />;
 
   const dataToRender =
-    sheetName === "INVENTORY" ? materialListB : headingRows.slice(1);
+    sheetName === "INVENTORY"
+      ? materialListB.slice(isFilterApplied ? 0 : 1)
+      : headingRows.slice(1);
 
+  if (dataToRender.length === 0) return <NoInfoFound />;
   return (
     <Table className="border-stroke px-7.5 dark:border-strokedark dark:bg-boxdark mt-6 rounded-md border bg-white py-6 shadow-default">
       <TableCaption>A list of all the recorded data.</TableCaption>
