@@ -1,25 +1,19 @@
 import { NextResponse } from "next/server";
 import { google } from "googleapis";
-import path from "path";
-import { auth } from "@/lib/sheetConfig";
-import { sheedIds } from "@/lib/pagesSheetids"
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "../auth/[...nextauth]/route";
 
-type SheetData = (string | number)[][];
-
-interface RowData {
-  [key: string]: string | number;
+async function getGoogleSheetsClient(accessToken: string) {
+  const auth = new google.auth.OAuth2();
+  auth.setCredentials({ access_token: accessToken });
+  return google.sheets({ version: "v4", auth });
 }
 
-interface CategorizedData {
-  [date: string]: RowData[];
-}
-
-async function WriteToSheet(values: any) {
-  const sheets = google.sheets({ version: "v4", auth });
+async function writeToSheet(values: any, accessToken: string) {
+  const sheets = await getGoogleSheetsClient(accessToken);
   const spreadsheetId = "1yxSl2Q_yEa-C3IjJa4MguYHd9wmnlElnJ3aaUI3MWSM";
   const range = "DAILY WORK DATA";
   const valueInputOption = "USER_ENTERED";
-  const resource = { values };
 
   try {
     const res = await sheets.spreadsheets.values.append({
@@ -36,10 +30,10 @@ async function WriteToSheet(values: any) {
   }
 }
 
-export async function readSheet(sheetName: string) {
-  const sheets = google.sheets({ version: "v4", auth });
+async function readSheet(sheetName: string, accessToken: string) {
+  const sheets = await getGoogleSheetsClient(accessToken);
   const spreadsheetId = "1yxSl2Q_yEa-C3IjJa4MguYHd9wmnlElnJ3aaUI3MWSM";
-  const range = `${!sheetName ? "Sheet1" : sheetName}!A1:Z`;
+  const range = `${sheetName || "Sheet1"}!A1:Z`;
 
   try {
     const response = await sheets.spreadsheets.values.get({
@@ -48,7 +42,6 @@ export async function readSheet(sheetName: string) {
     });
     const rows = response.data.values;
 
-    // Check if rows is empty
     if (!rows || rows.length === 0) {
       return "EMPTY";
     }
@@ -59,36 +52,22 @@ export async function readSheet(sheetName: string) {
   }
 }
 
-// export async function deleteRow(sheetName: string, rowIndex: number) {
-//   const sheets = google.sheets({ version: "v4", auth });
-//   const spreadsheetId = "1yxSl2Q_yEa-C3IjJa4MguYHd9wmnlElnJ3aaUI3MWSM";
-//   const range = `${sheetName}!${rowIndex}:${rowIndex}`;
-
-//   try {
-//     const res = await sheets.spreadsheets.values.clear({
-//       spreadsheetId,
-//       range,
-//     });
-//     return res;
-//   } catch (error) {
-//     console.error("Error deleting row:", error);
-//     throw error;
-//   }
-// }
-
-export async function deleteRow(sheetName: string, rowIndex: number) {
-  const sheets = google.sheets({ version: "v4", auth });
+async function deleteRow(
+  sheetName: string,
+  rowIndex: number,
+  accessToken: string,
+) {
+  const sheets = await getGoogleSheetsClient(accessToken);
   const spreadsheetId = "1yxSl2Q_yEa-C3IjJa4MguYHd9wmnlElnJ3aaUI3MWSM";
-  const range = `${sheetName}!${rowIndex}:${rowIndex}`;
   const requestBody = {
     requests: [
       {
         deleteDimension: {
           range: {
-            sheetId: sheedIds[sheetName],
+            sheetId: sheetName, // Adjust if sheetName isn't the actual sheetId
             dimension: "ROWS",
             startIndex: rowIndex - 1,
-            endIndex: rowIndex, // Delete only one row
+            endIndex: rowIndex,
           },
         },
       },
@@ -106,58 +85,38 @@ export async function deleteRow(sheetName: string, rowIndex: number) {
     throw error;
   }
 }
-// 1554936636
-// ? Categorize data on the basis of data
-// Well did'nt used this function , maybe will user later
-// function categorizeByDate(sheetData: SheetData): CategorizedData {
-//   // Extract headers and data rows
-//   const headers = sheetData[0] as string[];
-//   const dataRows = sheetData.slice(1);
 
-//   // Initialize an object to hold categorized data by dates
-//   const categorizedData: CategorizedData = {};
+export async function GET(req: Request) {
+  const session = await getServerSession(authOptions);
+  console.log("MG", session);
+  if (!session || !session.accessToken) {
+    return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+  }
 
-//   // Process each data row
-//   dataRows.forEach((row) => {
-//     const date = row[1] as string; // Date is the second element in the row
-
-//     // If the date is not already a key in the categorizedData object, create an empty array for it
-//     if (!categorizedData[date]) {
-//       categorizedData[date] = [];
-//     }
-
-//     // Create an object representing the current row with headers as keys
-//     const rowData: RowData = {};
-//     headers.forEach((header, index) => {
-//       rowData[header] = row[index];
-//     });
-
-//     // Add the current row data to the corresponding date's array
-//     categorizedData[date].push(rowData);
-//   });
-
-//   return categorizedData;
-// }
-
-export async function GET(req: Request, res: Response) {
   try {
     const url = new URL(req.url);
     const sheetName = url.searchParams.get("sheetName")?.toString();
-    if (sheetName === undefined)
+    if (!sheetName) {
       return NextResponse.json({
         res: false,
         msg: "Provide sheetName from client",
       });
+    }
 
-    const sheetRes = await readSheet(sheetName);
-
+    const sheetRes = await readSheet(sheetName, session.accessToken as string);
     return NextResponse.json(sheetRes);
   } catch (error) {
     console.log(error);
+    return NextResponse.json({ error: "An error occurred" }, { status: 500 });
   }
 }
 
-export async function POST(req: Request, res: Response) {
+export async function POST(req: Request) {
+  const session = await getServerSession(authOptions);
+  if (!session || !session.accessToken) {
+    return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+  }
+
   try {
     const {
       slNo,
@@ -173,39 +132,45 @@ export async function POST(req: Request, res: Response) {
       treeCount,
     } = await req.json();
 
-    const write = await WriteToSheet([
+    const write = await writeToSheet(
       [
-        slNo,
-        date,
-        material,
-        singleDetailOfWork,
-        treeListValue,
-        maleLabourCount,
-        femaleLabourCount,
-        block,
-        rowFrom,
-        rowTo,
-        treeCount,
+        [
+          slNo,
+          date,
+          material,
+          singleDetailOfWork,
+          treeListValue,
+          maleLabourCount,
+          femaleLabourCount,
+          block,
+          rowFrom,
+          rowTo,
+          treeCount,
+        ],
       ],
-    ]);
+      session.accessToken as string,
+    );
+
+    return NextResponse.json({ success: true });
   } catch (error) {
     console.log(error);
+    return NextResponse.json({ error: "An error occurred" }, { status: 500 });
   }
-  return NextResponse.json({ hi: "World" });
 }
 
-export async function PUT(req: Request, res: Response) {
+export async function PUT(req: Request) {
+  const session = await getServerSession(authOptions);
+  if (!session || !session.accessToken) {
+    return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+  }
+
   try {
-    try {
-      const { sheetName, rowIndex } = await req.json(); // Assuming the request contains sheetName and rowIndex to delete
-      await deleteRow(sheetName, rowIndex);
-      console.log("Row deleted successfully.");
-      return NextResponse.json({ success: true });
-    } catch (error) {
-      console.log(error);
-      return NextResponse.json({ success: false });
-    }
+    const { sheetName, rowIndex } = await req.json();
+    await deleteRow(sheetName, rowIndex, session.accessToken as string);
+    console.log("Row deleted successfully.");
+    return NextResponse.json({ success: true });
   } catch (error) {
     console.log(error);
+    return NextResponse.json({ error: "An error occurred" }, { status: 500 });
   }
 }

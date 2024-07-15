@@ -7,20 +7,26 @@ import { useDispatch } from "react-redux";
 import { storeAuthInfo } from "@/redux/features/authSlice";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/components/ui/use-toast";
-import Image from "next/image";
+import { getProviders, signIn, useSession } from "next-auth/react";
 import Link from "next/link";
 
 const SignIn: React.FC = () => {
   const [name, setName] = useState<string>("");
   const [password, setPassword] = useState<string>("");
-  const dispatch = useDispatch();
   const [sheetId, setSheetId] = useState<string>("");
   const [currentWorkingStep, setCurrentWorkingStep] = useState<1 | 2>(1);
   const [isShowingLogin, setIsShowingLogin] = useState<boolean>(true);
+  const dispatch = useDispatch();
   const router = useRouter();
   const { toast } = useToast();
+  const { data } = useSession();
 
-  const handleSubmit = async (e: any) => {
+  const fetchProviders = async () => {
+    const providers = await getProviders();
+    console.log(providers, "Providers list");
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       if (name === "" || password === "" || sheetId === "") {
@@ -32,12 +38,8 @@ const SignIn: React.FC = () => {
           sheetId,
         });
 
-        console.log("Money heist", data);
         if (data?.res) {
-          // Store the JWT token
           localStorage.setItem("token", data.token);
-          // that means user is successfully authenticated
-          // dispatch(storeAuthInfo({ name: data?.name, role: data?.role }));
           router.push("/");
         }
       }
@@ -46,8 +48,8 @@ const SignIn: React.FC = () => {
     }
   };
 
-  const checkSheet = async (e: any) => {
-    e.preventDefault(); // Prevent default form submission
+  const checkSheet = async (e: React.FormEvent) => {
+    e.preventDefault();
     try {
       const { data } = await axios.get(`/api/linkSheet?sheetId=${sheetId}`);
       if (data.res) {
@@ -83,12 +85,8 @@ const SignIn: React.FC = () => {
           password,
         });
 
-        console.log("Money heist season 2", data);
         if (data?.res) {
-          // Store the JWT token
           localStorage.setItem("token", data.token);
-          // that means user is successfully authenticated
-          // dispatch(storeAuthInfo({ name: data?.name, role: data?.role }));
           router.push("/");
         }
       }
@@ -96,6 +94,8 @@ const SignIn: React.FC = () => {
       console.log(error);
     }
   };
+
+  console.log("i miss jagan", data);
 
   return (
     <div className="flex h-[100vh] w-full items-center justify-center">
@@ -127,6 +127,7 @@ const SignIn: React.FC = () => {
             />
             <div className="mt-6 flex w-full items-center justify-center">
               <Button onClick={handleLogin}>Login</Button>
+              <Button onClick={() => signIn("google")}>Google Signin</Button>
             </div>
             <p>
               Don't have an account?{" "}
@@ -142,7 +143,7 @@ const SignIn: React.FC = () => {
         ) : (
           <>
             <div className="text-center">
-              <label htmlFor="">Step {currentWorkingStep} out of 2</label>
+              <label>Step {currentWorkingStep} out of 2</label>
             </div>
             {currentWorkingStep === 1 ? (
               <div className="mt-3">

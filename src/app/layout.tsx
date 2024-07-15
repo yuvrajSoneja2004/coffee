@@ -8,6 +8,7 @@ import Loader from "@/components/common/Loader";
 import { ReduxProvider } from "@/redux/features/provider";
 import { Toaster } from "@/components/ui/toaster";
 import CheckAuth from "@/wrappers/checkAuth";
+import { SessionProvider } from "next-auth/react";
 
 const RootLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   // const [loading, setLoading] = useState(true);
@@ -22,10 +23,11 @@ const RootLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     <html>
       <body>
         <div className="dark:bg-boxdark-2 dark:text-bodydark">
-          <ReduxProvider>
-            <CheckAuth>{children}</CheckAuth>
-          </ReduxProvider>
-
+          <SessionProvider>
+            <ReduxProvider>
+              <CheckAuth>{children}</CheckAuth>
+            </ReduxProvider>
+          </SessionProvider>
           <Toaster />
         </div>
       </body>

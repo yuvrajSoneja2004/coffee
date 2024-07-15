@@ -35,7 +35,7 @@ export async function POST(req: Request, res: Response) {
       temperatureMax,
     } = await req.json();
 
-    const write = await WriteToSheet([
+    await WriteToSheet([
       [
         date,
         rainfall,

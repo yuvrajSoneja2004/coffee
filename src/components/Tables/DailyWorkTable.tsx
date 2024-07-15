@@ -22,6 +22,7 @@ import {
 } from "@/redux/features/authSlice";
 import Edit from "../Actions/DailyMaterialData/Edit";
 import { formatDate } from "@/lib/formatDate";
+import { useSession } from "next-auth/react";
 
 interface DailyWorkTableProps {
   sheetName: string;
@@ -39,6 +40,8 @@ function DailyWorkTable({ sheetName }: DailyWorkTableProps) {
     (state) => state.authSlice,
   );
   const dispatch = useDispatch();
+  const { data } = useSession();
+  console.log("why", data);
 
   const getData = async () => {
     setIsLoading(true);
@@ -46,7 +49,7 @@ function DailyWorkTable({ sheetName }: DailyWorkTableProps) {
       const { data } = await axios.get(
         `/api/googletest?sheetName=${sheetName}&spreadSheetId=${sheetId}&subSheetId=${subsheetsIds[sheetName]}`,
       );
-
+      console.log(data, "yelp");
       const [headerRow, ...dataRows] = data;
       setHeaders(headerRow);
 

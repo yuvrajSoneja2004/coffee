@@ -12,16 +12,18 @@ export async function GET(req: Request, res: Response) {
         msg: "Provide userId from client",
       });
 
-    console.log(userId);
-    const currentUser = await User.findById(userId);
-    console.log(currentUser);
+    console.log("userid from client" ,userId);
+    // const currentUser = await User.findById(userId);
+    const currentUser = await User.findOne({ _id: userId });
+    console.log('currentUser', currentUser);
+    console.log("After");
     // Remove password field
-    currentUser.password = "";
+    // currentUser.password = "";
     return NextResponse.json(currentUser);
   } catch (error) {
     return NextResponse.json({
       res: false,
-      msg: `Error error`,
+      msg: error,
     });
   }
 }
