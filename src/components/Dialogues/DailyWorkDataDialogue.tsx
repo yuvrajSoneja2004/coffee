@@ -24,6 +24,7 @@ import { handleReload } from "@/redux/features/authSlice";
 import { useToast } from "../ui/use-toast";
 import { formatDate } from "@/lib/formatDate";
 import { useForm, Controller } from "react-hook-form";
+import { axiosInstance } from "@/lib/axiosInstance";
 
 function DailyWorkDataDialogue() {
   const { toast } = useToast();
@@ -69,15 +70,14 @@ function DailyWorkDataDialogue() {
       treeCount: data.treeCount,
     };
 
-    fetch("/api/googletest", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(payload),
-    })
+    axiosInstance
+      .post("/api/googletest", payload, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      })
       .then((response) => {
-        if (response.ok) {
+        if (response.status === 200) {
           if (hasToReload) {
             setOpen(false);
             dispatch(handleReload(12));
@@ -113,7 +113,7 @@ function DailyWorkDataDialogue() {
   useEffect(() => {
     const getFieldsData = async () => {
       try {
-        const { data } = await axios.get(
+        const { data } = await axiosInstance.get(
           `/api/getFields?sheetName=LIST AND OPTIONS A`,
         );
         setMaterialList(data);

@@ -8,10 +8,10 @@ async function getGoogleSheetsClient(accessToken: string) {
   auth.setCredentials({ access_token: accessToken });
   return google.sheets({ version: "v4", auth });
 }
+// const spreadsheetId = "1yxSl2Q_yEa-C3IjJa4MguYHd9wmnlElnJ3aaUI3MWSM";
 
-async function writeToSheet(values: any, accessToken: string) {
+async function writeToSheet(values: any, accessToken: string , spreadsheetId: string) {
   const sheets = await getGoogleSheetsClient(accessToken);
-  const spreadsheetId = "1yxSl2Q_yEa-C3IjJa4MguYHd9wmnlElnJ3aaUI3MWSM";
   const range = "DAILY WORK DATA";
   const valueInputOption = "USER_ENTERED";
 
@@ -64,7 +64,7 @@ async function deleteRow(
       {
         deleteDimension: {
           range: {
-            sheetId: sheetName, // Adjust if sheetName isn't the actual sheetId
+            sheetId: sheetName,
             dimension: "ROWS",
             startIndex: rowIndex - 1,
             endIndex: rowIndex,
@@ -88,7 +88,6 @@ async function deleteRow(
 
 export async function GET(req: Request) {
   const session = await getServerSession(authOptions);
-  console.log("MG", session);
   if (!session || !session.accessToken) {
     return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
   }
@@ -107,6 +106,7 @@ export async function GET(req: Request) {
     return NextResponse.json(sheetRes);
   } catch (error) {
     console.log(error);
+    console.log("da error", error);
     return NextResponse.json({ error: "An error occurred" }, { status: 500 });
   }
 }
@@ -130,7 +130,10 @@ export async function POST(req: Request) {
       rowFrom,
       rowTo,
       treeCount,
+      spreadSheetId
     } = await req.json();
+
+    console.log("galliyan" , spreadSheetId)
 
     const write = await writeToSheet(
       [
@@ -149,6 +152,7 @@ export async function POST(req: Request) {
         ],
       ],
       session.accessToken as string,
+      spreadSheetId
     );
 
     return NextResponse.json({ success: true });
