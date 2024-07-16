@@ -21,6 +21,10 @@ import {
 import { allData, blocks, treeList, typeofWork } from "@/lib/db";
 import { useAppSelector } from "@/redux/store";
 import { Input } from "@/components/ui/input";
+import { axiosInstance } from "@/lib/axiosInstance";
+import { handleReload } from "@/redux/features/authSlice";
+import { useDispatch } from "react-redux";
+import { formatDate } from "@/lib/formatDate";
 
 function Edit({ isAllowed, data, rowIndex, sheetName }: any) {
   const [
@@ -48,15 +52,9 @@ function Edit({ isAllowed, data, rowIndex, sheetName }: any) {
   const [treeCount, setTreeCount] = useState(tCount);
   // const { slNoStarts } = useAppSelector((state) => state.authSlice);
   const [open, setOpen] = useState(false);
+  const dispatch = useDispatch();
 
-  function formatDate(date) {
-    const day = date.getDate().toString().padStart(2, "0");
-    const month = (date.getMonth() + 1).toString().padStart(2, "0");
-    const year = date.getFullYear().toString().slice(-2); // Getting last two digits of the year
-    return `${day}.${month}.${year}`;
-  }
-
-  const handleSave = () => {
+  const handleSave = async () => {
     // Construct your payload with the state values
     const payload = {
       slNo: slNo,
@@ -73,25 +71,19 @@ function Edit({ isAllowed, data, rowIndex, sheetName }: any) {
       rowIndex: rowIndex,
       sheetName: sheetName,
     };
-    // Send HTTP request to the server
-    fetch("/api/editSheet", {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(payload),
-    })
-      .then((response) => {
-        setOpen(false);
-        if (response.ok) {
-          console.log("Data saved successfully!");
-        } else {
-          throw new Error("Failed to save data");
-        }
-      })
-      .catch((error) => {
-        console.error("Error saving data:", error);
-      });
+
+    try {
+      // Send HTTP request to the server using axios
+      const response = await axiosInstance.put("/api/editSheet", payload);
+      console.log(response.data);
+      setOpen(false);
+      dispatch(handleReload(19));
+
+      console.log(response);
+      console.log("lol saved successfully!");
+    } catch (error) {
+      console.error("Error saving data:", error);
+    }
   };
 
   return (
@@ -116,7 +108,7 @@ function Edit({ isAllowed, data, rowIndex, sheetName }: any) {
               </div>
               <div className="">
                 <label htmlFor="Date">Date</label>
-                <Input className="mt-2" value={formatDate(new Date())} />
+                <Input className="mt-2" value={formatDate()} />
               </div>
               {/* Dropdown  */}
               <div className="mt-2">

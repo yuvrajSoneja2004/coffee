@@ -14,6 +14,7 @@ import axios from "axios";
 import { useToast } from "../ui/use-toast";
 import { useDispatch } from "react-redux";
 import { handleReload } from "@/redux/features/authSlice";
+import { axiosInstance } from "@/lib/axiosInstance";
 
 function Delete({ rowIndex, isAllowed, sheetName }: any) {
   const { toast } = useToast();
@@ -21,7 +22,7 @@ function Delete({ rowIndex, isAllowed, sheetName }: any) {
   const dispatch = useDispatch();
   const handleDelete = async () => {
     try {
-      await axios.put("/api/googletest", {
+      await axiosInstance.put("/api/googletest", {
         sheetName: sheetName,
         rowIndex: rowIndex + 2,
       });

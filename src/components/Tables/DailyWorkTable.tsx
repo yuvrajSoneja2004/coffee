@@ -23,6 +23,7 @@ import {
 import Edit from "../Actions/DailyMaterialData/Edit";
 import { formatDate } from "@/lib/formatDate";
 import { useSession } from "next-auth/react";
+import { axiosInstance } from "@/lib/axiosInstance";
 
 interface DailyWorkTableProps {
   sheetName: string;
@@ -41,15 +42,13 @@ function DailyWorkTable({ sheetName }: DailyWorkTableProps) {
   );
   const dispatch = useDispatch();
   const { data } = useSession();
-  console.log("why", data);
 
   const getData = async () => {
     setIsLoading(true);
     try {
-      const { data } = await axios.get(
-        `/api/googletest?sheetName=${sheetName}&spreadSheetId=${sheetId}&subSheetId=${subsheetsIds[sheetName]}`,
+      const { data } = await axiosInstance.get(
+        `/api/googletest?sheetName=${sheetName}&subSheetId=${subsheetsIds[sheetName]}`,
       );
-      console.log(data, "yelp");
       const [headerRow, ...dataRows] = data;
       setHeaders(headerRow);
 
@@ -92,14 +91,14 @@ function DailyWorkTable({ sheetName }: DailyWorkTableProps) {
   };
   useEffect(() => {
     getData();
-  }, [reloadHandler]);
+  }, [reloadHandler, sheetId]);
 
   if (isLoading) return <Loader additionalStyles="mt-5" />;
   if (Object.keys(categorizedData).length === 0) return <NoInfoFound />;
 
   return (
     <Table className="border-stroke px-7.5 dark:border-strokedark dark:bg-boxdark mt-6 rounded-md border bg-white py-6 shadow-default">
-      <TableCaption>A list of all the recorded data.</TableCaption>
+      <TableCaption>{sheetId}</TableCaption>
       <TableHeader>
         <TableRow className="text-sm">
           {/* Render table headings */}

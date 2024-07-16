@@ -18,7 +18,7 @@ export async function GET(req: Request, res: Response) {
     console.log('currentUser', currentUser);
     console.log("After");
     // Remove password field
-    // currentUser.password = "";
+    currentUser.password = "";
     return NextResponse.json(currentUser);
   } catch (error) {
     return NextResponse.json({

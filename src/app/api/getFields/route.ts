@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { google } from "googleapis";
 import path from "path";
 import { auth } from "@/lib/sheetConfig";
+import type NextRequest from "next/server";
 
 export async function readSheet(sheetName: string) {
   const sheets = google.sheets({ version: "v4", auth });
@@ -29,6 +30,7 @@ export async function readSheet(sheetName: string) {
 export async function GET(req: Request, res: Response) {
   try {
     const url = new URL(req.url);
+    const headers = new Headers(req.headers);
     const sheetName = url.searchParams.get("sheetName")?.toString();
     if (sheetName === undefined)
       return NextResponse.json({

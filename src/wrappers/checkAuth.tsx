@@ -20,9 +20,9 @@ const CheckAuth: React.FC<Props> = ({ children }) => {
   const fetchCurrentUserData = async (userId: string) => {
     try {
       const { data } = await axios.get(`/api/getCurrentUser?userId=${userId}`);
-      console.log(data);
       // Destructuring fields from data
       const { name, role, sheetId, subsheetsIds } = data;
+      console.log(data, "dsfgn");
       dispatch(
         storeAuthInfo({
           name,

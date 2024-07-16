@@ -74,7 +74,6 @@ export async function POST(req: Request) {
         subsheetsIds[sheet.properties.title] = sheet.properties.sheetId;
       }
     });
-    console.log("why", subsheetsIds);
 
     // Step 2: Store info in DB
     const hashedPassword = await bcrypt.hash(password, 10);

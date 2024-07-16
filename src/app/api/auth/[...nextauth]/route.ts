@@ -26,20 +26,16 @@ export const authOptions = {
     async jwt({ token, account }) {
       // Check if it's the initial sign-in
       if (account) {
-        console.log("Account available during initial sign-in", account);
         token.accessToken = account.access_token;
       } else {
-        console.log("Account not available, using existing token", token);
       }
 
-      console.log("Token", token);
       return token;
     },
     async session({ session, token }) {
       if (token.accessToken) {
         session.accessToken = token.accessToken;
       }
-      console.log("Session", session);
       return session;
     },
   },
