@@ -18,7 +18,6 @@ async function UpdateToSheet(
   subSheetId: string,
   accessToken: string,
 ) {
-  // TODO: Fix update sheet not working.
   const sheets = await getGoogleSheetsClient(accessToken);
   // const spreadsheetId = "1yxSl2Q_yEa-C3IjJa4MguYHd9wmnlElnJ3aaUI3MWSM";
   const range = `${sheetName}!${rowIndex + 2}:${rowIndex + 2}`;

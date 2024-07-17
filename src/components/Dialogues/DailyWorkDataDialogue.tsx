@@ -123,7 +123,7 @@ function DailyWorkDataDialogue() {
       }
     };
     // Avoid fetching fields data when sheetId is not fetched yet from user account schema. If sheetId exists , then its gonna fetch fields data
-    if (sheetId.length > 1) {
+    if (sheetId?.length > 1) {
       getFieldsData();
     }
   }, [sheetId]);

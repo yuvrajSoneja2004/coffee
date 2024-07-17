@@ -6,11 +6,9 @@ import { Input } from "../ui/input";
 import { Dialog, DialogContent, DialogHeader } from "@/components/ui/dialog";
 
 import { useAppSelector } from "@/redux/store";
-import axios from "axios";
 import { formatDate } from "@/lib/formatDate";
 import { handleReload } from "@/redux/features/authSlice";
 import { useDispatch } from "react-redux";
-import { useForm, Controller } from "react-hook-form";
 import { ScrollArea } from "../ui/scroll-area";
 import {
   DropdownMenu,
@@ -18,6 +16,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
+import { axiosInstance } from "@/lib/axiosInstance";
 
 function InventoryDialogue() {
   const [material, setMaterial] = useState<string>("");
@@ -26,69 +25,58 @@ function InventoryDialogue() {
   const [baseItem, setBaseItem] = useState<string>("");
   const [currentItemUnit, setCurrentItemUnit] = useState<string>("");
   const [qty, setQty] = useState<string>("0");
-  const { slNoStarts } = useAppSelector((state) => state.authSlice);
+  const { sheetId } = useAppSelector((state) => state.authSlice);
   const [open, setOpen] = useState(false);
   const dispatch = useDispatch();
 
-  const {
-    control,
-    handleSubmit,
-    reset,
-    formState: { errors },
-  } = useForm({
-    defaultValues: {
-      material: "",
-      baseItem: "",
-      currentItemUnit: "",
-      qty: "0",
-    },
-  });
-
-  const handleSave = handleSubmit((data) => {
+  const handleSave = async (event) => {
+    event.preventDefault();
     const payload = {
       date: formatDate(),
-      material: data.material,
-      baseItem: data.baseItem,
-      currentItemUnit: data.currentItemUnit,
-      qty: data.qty,
+      material,
+      baseItem,
+      currentItemUnit,
+      qty,
     };
 
-    fetch("/api/saveInventory", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(payload),
-    })
-      .then((response) => {
-        setOpen(false);
-        if (response.ok) {
-          dispatch(handleReload(12));
-          console.log("Inventory saved successfully!");
-          reset();
-        } else {
-          throw new Error("Failed to save data");
-        }
-      })
-      .catch((error) => {
-        console.error("Error saving data:", error);
+    try {
+      const response = await axiosInstance.post("/api/saveInventory", payload, {
+        headers: {
+          "Content-Type": "application/json",
+        },
       });
-  });
+
+      setOpen(false);
+      if (response.status === 200) {
+        dispatch(handleReload(12));
+        console.log("Inventory saved successfully!");
+        setMaterial("");
+        setBaseItem("");
+        setCurrentItemUnit("");
+        setQty("0");
+      } else {
+        throw new Error("Failed to save data");
+      }
+    } catch (error) {
+      console.error("Error saving data:", error);
+    }
+  };
 
   useEffect(() => {
     const getFieldsData = async () => {
       try {
-        const { data } = await axios.get(
-          "/api/getFields?sheetName=LIST AND OPTIONS",
+        const { data } = await axiosInstance.get(
+          `/api/getFields?sheetName=LIST AND OPTIONS`,
         );
         setMaterialList(data);
-        console.log("Inventory res", data);
       } catch (error) {
         console.log(error);
       }
     };
-    getFieldsData();
-  }, []);
+    if (sheetId?.length > 1) {
+      getFieldsData();
+    }
+  }, [sheetId]);
 
   const extractUnit = (str: string) => {
     const match = str.match(/\[(.*?)\]/);
@@ -125,17 +113,11 @@ function InventoryDialogue() {
                 <DropdownMenu>
                   <DropdownMenuTrigger className="flex w-full cursor-pointer flex-col items-start">
                     <label htmlFor="Material">Material</label>
-                    <Controller
-                      name="material"
-                      control={control}
-                      rules={{ required: "Material is required" }}
-                      render={({ field }) => (
-                        <Input
-                          className="mt-2"
-                          {...field}
-                          placeholder={material}
-                        />
-                      )}
+                    <Input
+                      className="mt-2"
+                      value={material}
+                      placeholder="Select material"
+                      readOnly
                     />
                   </DropdownMenuTrigger>
                   <DropdownMenuContent>
@@ -165,18 +147,11 @@ function InventoryDialogue() {
                     <label htmlFor="BaseItem">
                       {material ? material : "Select material type"}
                     </label>
-                    <Controller
-                      name="baseItem"
-                      control={control}
-                      rules={{ required: "Base Item is required" }}
-                      render={({ field }) => (
-                        <Input
-                          className="mt-2"
-                          {...field}
-                          placeholder={baseItem}
-                          disabled={!material}
-                        />
-                      )}
+                    <Input
+                      className="mt-2"
+                      value={baseItem}
+                      placeholder="Select base item"
+                      readOnly
                     />
                   </DropdownMenuTrigger>
                   <DropdownMenuContent>
@@ -222,14 +197,6 @@ function InventoryDialogue() {
                 />
               </div>
               <Button type="submit">Save Data</Button>
-            </div>
-            <div>
-              {errors.material && (
-                <p className="text-red-500">{errors.material.message}</p>
-              )}
-              {errors.baseItem && (
-                <p className="text-red-500">{errors.baseItem.message}</p>
-              )}
             </div>
           </form>
         </DialogHeader>

@@ -1,7 +1,14 @@
 import { auth } from "@/lib/sheetConfig";
 import { google } from "googleapis";
+import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
+import { authOptions } from "../auth/[...nextauth]/route";
 
+async function getGoogleSheetsClient(accessToken: string) {
+  const auth = new google.auth.OAuth2();
+  auth.setCredentials({ access_token: accessToken });
+  return google.sheets({ version: "v4", auth });
+}
 async function updateCellValue(valueToUpdate: number, cellPosition: number) {
   const sheets = google.sheets({ version: "v4", auth });
   const spreadsheetId = "1yxSl2Q_yEa-C3IjJa4MguYHd9wmnlElnJ3aaUI3MWSM";
@@ -23,7 +30,6 @@ async function updateCellValue(valueToUpdate: number, cellPosition: number) {
   }
 }
 
-
 // Define types for parsed values and inventory items
 interface ParsedValue {
   baseItem: string;
@@ -35,17 +41,21 @@ interface InventoryItem {
   rowIndex: number;
 }
 
+// const spreadsheetId = "1yxSl2Q_yEa-C3IjJa4MguYHd9wmnlElnJ3aaUI3MWSM";
+export async function handleInventoryChanges(
+  solutionName: string,
+  ltrValue: number,
+  spreadsheetId: string,
+  accessToken: string,
+): Promise<string | void> {
+  const sheets = await getGoogleSheetsClient(accessToken);
 
-export async function handleInventoryChanges(solutionName: string, ltrValue: number): Promise<string | void> {
-  const sheets = google.sheets({ version: "v4", auth });
-  const spreadsheetId = "1yxSl2Q_yEa-C3IjJa4MguYHd9wmnlElnJ3aaUI3MWSM";
-  
-  // Elements Composition Sheet 
-  const elementsRange = 'ELEMENTS COMPOSITION!A1:Z';
-  const inventoryRange = 'INVENTORY!A1:Z';
-  
+  // Elements Composition Sheet
+  const elementsRange = "ELEMENTS COMPOSITION!A1:Z";
+  const inventoryRange = "INVENTORY!A1:Z";
+
   try {
-    // Fetch Elements Composition Sheet 
+    // Fetch Elements Composition Sheet
     const elementsResponse = await sheets.spreadsheets.values.get({
       spreadsheetId,
       range: elementsRange,
@@ -58,7 +68,7 @@ export async function handleInventoryChanges(solutionName: string, ltrValue: num
 
     // Find the column index for the given solutionName
     const headers = rows[0];
-    const columnIndex = headers.findIndex(header => header === solutionName);
+    const columnIndex = headers.findIndex((header) => header === solutionName);
 
     if (columnIndex === -1) {
       // console.log(`Column ${solutionName} not found`);
@@ -66,15 +76,20 @@ export async function handleInventoryChanges(solutionName: string, ltrValue: num
     }
 
     // Extract and parse the values from the column
-    const columnValues = rows.slice(1).map(row => row[columnIndex]).filter(value => value !== "");
+    const columnValues = rows
+      .slice(1)
+      .map((row) => row[columnIndex])
+      .filter((value) => value !== "");
 
-    const parsedValues: ParsedValue[] = columnValues.map(value => {
-      const match = value.match(/([^\[]+)\[(\d+)\]/);
-      if (match) {
-        return { baseItem: match[1].trim(), qty: parseInt(match[2], 10) };
-      }
-      return null;
-    }).filter((item): item is ParsedValue => item !== null);
+    const parsedValues: ParsedValue[] = columnValues
+      .map((value) => {
+        const match = value.match(/([^\[]+)\[(\d+)\]/);
+        if (match) {
+          return { baseItem: match[1].trim(), qty: parseInt(match[2], 10) };
+        }
+        return null;
+      })
+      .filter((item): item is ParsedValue => item !== null);
 
     // console.log(parsedValues);
 
@@ -90,8 +105,10 @@ export async function handleInventoryChanges(solutionName: string, ltrValue: num
     }
 
     const inventoryHeaders = inventoryRows[0];
-    const baseItemIndex = inventoryHeaders.findIndex(header => header === "BaseItem");
-    const qtyIndex = inventoryHeaders.findIndex(header => header === "QTY");
+    const baseItemIndex = inventoryHeaders.findIndex(
+      (header) => header === "BaseItem",
+    );
+    const qtyIndex = inventoryHeaders.findIndex((header) => header === "QTY");
 
     if (baseItemIndex === -1 || qtyIndex === -1) {
       // console.log(`BaseItem or QTY column not found in INVENTORY sheet`);
@@ -102,7 +119,10 @@ export async function handleInventoryChanges(solutionName: string, ltrValue: num
     const inventoryMap = new Map<string, InventoryItem>();
     for (let i = 1; i < inventoryRows.length; i++) {
       const row = inventoryRows[i];
-      inventoryMap.set(row[baseItemIndex], { qty: parseInt(row[qtyIndex], 10), rowIndex: i });
+      inventoryMap.set(row[baseItemIndex], {
+        qty: parseInt(row[qtyIndex], 10),
+        rowIndex: i,
+      });
     }
 
     // Check for sufficient materials and presence of all base items
@@ -130,12 +150,14 @@ export async function handleInventoryChanges(solutionName: string, ltrValue: num
     // Prepare the updated values to write back to the QTY column in the sheet
     const updateRequests: Promise<sheets_v4.Schema$UpdateValuesResponse>[] = [];
     inventoryMap.forEach((value, key) => {
-      updateRequests.push(sheets.spreadsheets.values.update({
-        spreadsheetId,
-        range: `INVENTORY!${String.fromCharCode(65 + qtyIndex)}${value.rowIndex + 1}`, // Update QTY column
-        valueInputOption: "USER_ENTERED",
-        resource: { values: [[value.qty]] },
-      }));
+      updateRequests.push(
+        sheets.spreadsheets.values.update({
+          spreadsheetId,
+          range: `INVENTORY!${String.fromCharCode(65 + qtyIndex)}${value.rowIndex + 1}`, // Update QTY column
+          valueInputOption: "USER_ENTERED",
+          resource: { values: [[value.qty]] },
+        }),
+      );
     });
 
     await Promise.all(updateRequests);
@@ -147,25 +169,36 @@ export async function handleInventoryChanges(solutionName: string, ltrValue: num
   }
 }
 
-
-
 export async function POST(req: Request, res: Response) {
+  const session = await getServerSession(authOptions);
+  if (!session || !session.accessToken) {
+    return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+  }
   try {
-    const { date, material, baseMaterial, currentItemUnit, qtyType, qty } =
-      await req.json();
+    const {
+      date,
+      material,
+      baseMaterial,
+      currentItemUnit,
+      qtyType,
+      qty,
+      spreadSheetId,
+    } = await req.json();
 
-
-    if(material === "Solutions"){
-      const moduleRes = await handleInventoryChanges(baseMaterial, parseInt(qty))
-      console.log(moduleRes)
+    if (material === "Solutions") {
+      const moduleRes = await handleInventoryChanges(
+        baseMaterial,
+        parseInt(qty),
+        spreadSheetId,
+        session.accessToken as string,
+      );
+      console.log(moduleRes);
 
       return NextResponse.json({
         res: moduleRes !== "SUCCESS" ? false : true,
-        msg: moduleRes
-      })
-
+        msg: moduleRes,
+      });
     }
-
   } catch (error) {
     return NextResponse.json(
       {

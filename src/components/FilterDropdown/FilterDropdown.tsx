@@ -2,7 +2,6 @@
 
 import * as React from "react";
 import { Check, ChevronsUpDown } from "lucide-react";
-import axios from "axios";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -24,6 +23,8 @@ import {
   handleFilterUpdate,
   setMaterialList as setReduxMaterialList,
 } from "../../redux/features/inventoryFilter";
+import { axiosInstance } from "@/lib/axiosInstance";
+import { useAppSelector } from "@/redux/store";
 
 export function ComboboxDemo({ list, onSelect }: any) {
   const [open, setOpen] = React.useState(false);
@@ -80,12 +81,26 @@ function FilterDropdown() {
   const [material, setMaterial] = React.useState<string>("");
   const [unit, setUnit] = React.useState<string>("");
   const [materialTypeIndex, setMaterialTypeIndex] = React.useState<number>(0);
+  const { sheetId } = useAppSelector((state) => state.authSlice);
   const dispatch = useDispatch();
 
+  // React.useEffect(() => {
+  //   const getFieldsData = async () => {
+  //     try {
+  //       const { data } = await axiosInstance.get(
+  //         `/api/getFields?sheetName=LIST AND OPTIONS`,
+  //       );
+  //       setLocalMaterialList(data);
+  //     } catch (error) {
+  //       console.log(error);
+  //     }
+  //   };
+  //   getFieldsData();
+  // }, []);
   React.useEffect(() => {
     const getFieldsData = async () => {
       try {
-        const { data } = await axios.get(
+        const { data } = await axiosInstance.get(
           `/api/getFields?sheetName=LIST AND OPTIONS`,
         );
         setLocalMaterialList(data);
@@ -93,8 +108,11 @@ function FilterDropdown() {
         console.log(error);
       }
     };
-    getFieldsData();
-  }, []);
+    // Avoid fetching fields data when sheetId is not fetched yet from user account schema. If sheetId exists , then its gonna fetch fields data
+    if (sheetId?.length > 1) {
+      getFieldsData();
+    }
+  }, [sheetId]);
 
   const handleMaterialSelect = (value: string) => {
     const index = localMaterialList
@@ -107,7 +125,7 @@ function FilterDropdown() {
 
   const handleApplyFilters = async () => {
     try {
-      const { data } = await axios.post("/api/filterInventory", {
+      const { data } = await axiosInstance.post("/api/filterInventory", {
         material,
         unit,
       });

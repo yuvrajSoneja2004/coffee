@@ -2,9 +2,10 @@ import { google, sheets_v4 } from "googleapis";
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/sheetConfig";
 
-export async function readSheet(): Promise<string[][] | "EMPTY"> {
+// TODO: Continue from here.
+// const spreadsheetId = "1yxSl2Q_yEa-C3IjJa4MguYHd9wmnlElnJ3aaUI3MWSM";
+export async function readSheet(spreadsheetId: string): Promise<string[][] | "EMPTY"> {
   const sheets = google.sheets({ version: "v4", auth });
-  const spreadsheetId = "1yxSl2Q_yEa-C3IjJa4MguYHd9wmnlElnJ3aaUI3MWSM";
   const range = `INVENTORY!A1:Z`;
 
   try {
@@ -28,14 +29,16 @@ export async function readSheet(): Promise<string[][] | "EMPTY"> {
 interface FilterParams {
   material: string;
   unit: string;
+  spreadSheetId: string;
 }
 
 async function filterInventory(
   material: string,
   unit: string,
+  spreadSheetId:string
 ): Promise<string[][]> {
   try {
-    const rows = await readSheet();
+    const rows = await readSheet(spreadSheetId);
     if (rows === "EMPTY") {
       return [];
     }
@@ -60,8 +63,8 @@ async function filterInventory(
 
 export async function POST(req: Request, res: Response): Promise<NextResponse> {
   try {
-    const { material, unit }: FilterParams = await req.json();
-    const filterRes = await filterInventory(material, unit);
+    const { material, unit , spreadSheetId }: FilterParams = await req.json();
+    const filterRes = await filterInventory(material, unit , spreadSheetId);
     return NextResponse.json(filterRes);
   } catch (error) {
     console.log(error);

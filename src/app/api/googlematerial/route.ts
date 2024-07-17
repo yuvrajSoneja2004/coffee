@@ -1,11 +1,21 @@
 import { NextResponse } from "next/server";
 import { google } from "googleapis";
 import { auth } from "@/lib/sheetConfig";
+import { getServerSession } from "next-auth";
+import { authOptions } from "../auth/[...nextauth]/route";
 
-
-async function WriteToSheet(values) {
-  const sheets = google.sheets({ version: "v4", auth });
-  const spreadsheetId = "1yxSl2Q_yEa-C3IjJa4MguYHd9wmnlElnJ3aaUI3MWSM";
+// const spreadsheetId = "1yxSl2Q_yEa-C3IjJa4MguYHd9wmnlElnJ3aaUI3MWSM";
+async function getGoogleSheetsClient(accessToken: string) {
+  const auth = new google.auth.OAuth2();
+  auth.setCredentials({ access_token: accessToken });
+  return google.sheets({ version: "v4", auth });
+}
+async function WriteToSheet(
+  values,
+  spreadsheetId: string,
+  accessToken: string,
+) {
+  const sheets = await getGoogleSheetsClient(accessToken);
   const range = "MATERIAL";
   const valueInputOption = "USER_ENTERED";
   const resource = { values };
@@ -25,9 +35,12 @@ async function WriteToSheet(values) {
   }
 }
 
-export async function readSheet(sheetName: string) {
-  const sheets = google.sheets({ version: "v4", auth });
-  const spreadsheetId = "1yxSl2Q_yEa-C3IjJa4MguYHd9wmnlElnJ3aaUI3MWSM";
+export async function readSheet(
+  sheetName: string,
+  spreadsheetId: string,
+  accessToken: string,
+) {
+  const sheets = await getGoogleSheetsClient(accessToken);
   const range = `${!sheetName ? "Sheet1" : sheetName}!A1:Z`;
 
   try {
@@ -48,9 +61,13 @@ export async function readSheet(sheetName: string) {
   }
 }
 
-export async function deleteRow(sheetName: string, rowIndex: number) {
-  const sheets = google.sheets({ version: "v4", auth });
-  const spreadsheetId = "1yxSl2Q_yEa-C3IjJa4MguYHd9wmnlElnJ3aaUI3MWSM";
+export async function deleteRow(
+  sheetName: string,
+  rowIndex: number,
+  spreadsheetId: string,
+  accessToken: string,
+) {
+  const sheets = await getGoogleSheetsClient(accessToken);
   const range = `${sheetName}!${rowIndex}:${rowIndex}`;
 
   try {
@@ -67,6 +84,10 @@ export async function deleteRow(sheetName: string, rowIndex: number) {
 
 export async function POST(req: Request, res: Response) {
   try {
+    const session = await getServerSession(authOptions);
+    if (!session || !session.accessToken) {
+      return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+    }
     const {
       slNo,
       date,
@@ -76,20 +97,25 @@ export async function POST(req: Request, res: Response) {
       inQty,
       outQty,
       remarks,
+      spreadSheetId,
     } = await req.json();
 
-    const write = await WriteToSheet([
+    await WriteToSheet(
       [
-        slNo,
-        date,
-        boughtIssuedBy,
-        baseMaterial,
-        singleUnit,
-        inQty,
-        outQty,
-        remarks,
+        [
+          slNo,
+          date,
+          boughtIssuedBy,
+          baseMaterial,
+          singleUnit,
+          inQty,
+          outQty,
+          remarks,
+        ],
       ],
-    ]);
+      spreadSheetId,
+      session.accessToken as string,
+    );
   } catch (error) {
     console.log(error);
   }
@@ -98,9 +124,18 @@ export async function POST(req: Request, res: Response) {
 
 export async function PUT(req: Request, res: Response) {
   try {
+    const session = await getServerSession(authOptions);
+    if (!session || !session.accessToken) {
+      return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+    }
     try {
-      const { sheetName, rowIndex } = await req.json(); // Assuming the request contains sheetName and rowIndex to delete
-      await deleteRow(sheetName, rowIndex);
+      const { sheetName, rowIndex, spreadSheetId } = await req.json(); // Assuming the request contains sheetName and rowIndex to delete
+      await deleteRow(
+        sheetName,
+        rowIndex,
+        spreadSheetId,
+        session.accessToken as string,
+      );
       console.log("Row deleted successfully.");
       return NextResponse.json({ success: true });
     } catch (error) {

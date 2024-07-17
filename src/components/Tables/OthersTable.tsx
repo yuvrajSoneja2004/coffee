@@ -9,7 +9,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import axios from "axios";
 import Loader from "../common/Loader";
 import NoInfoFound from "../NoInfoFound/NoInfoFound";
 import Delete from "../Actions/Delete";
@@ -18,6 +17,7 @@ import { useDispatch } from "react-redux";
 import { handleSlNo, handleSlNoMaterial } from "@/redux/features/authSlice";
 import { setMaterialList } from "@/redux/features/inventoryFilter";
 import Edit from "../Actions/DailyMaterialData/Edit";
+import { axiosInstance } from "@/lib/axiosInstance";
 
 interface OthersTableProps {
   sheetName: string;
@@ -28,7 +28,9 @@ export default function OthersTable({ sheetName }: OthersTableProps) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   // Selecting relevant parts of state using custom hooks
-  const { role } = useAppSelector((state) => state.authSlice);
+  const { role, sheetId, reloadHandler } = useAppSelector(
+    (state) => state.authSlice,
+  );
   const { materialListB, isFilterApplied } = useAppSelector(
     (state) => state.inventoryFilter,
   );
@@ -38,7 +40,7 @@ export default function OthersTable({ sheetName }: OthersTableProps) {
   const getData = async () => {
     setIsLoading(true);
     try {
-      const { data } = await axios.get(
+      const { data } = await axiosInstance.get(
         `/api/googletest?sheetName=${sheetName}`,
       );
       console.log(data);
@@ -65,8 +67,10 @@ export default function OthersTable({ sheetName }: OthersTableProps) {
 
   // Fetch data on initial load and reloadHandler change
   useEffect(() => {
-    getData();
-  }, []);
+    if (sheetId?.length > 1) {
+      getData();
+    }
+  }, [sheetId, reloadHandler]);
 
   // Show loader while loading data
   if (isLoading) return <Loader additionalStyles="mt-5" />;

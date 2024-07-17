@@ -23,6 +23,7 @@ import { handleReload } from "@/redux/features/authSlice";
 import { useDispatch } from "react-redux";
 import { formatDate } from "@/lib/formatDate";
 import { useForm, Controller } from "react-hook-form";
+import { axiosInstance } from "@/lib/axiosInstance";
 
 function MaterialDialogue() {
   const [material, setMaterial] = useState<string>("");
@@ -37,8 +38,8 @@ function MaterialDialogue() {
   });
   const dispatch = useDispatch();
 
-  const { slNoStarts } = useAppSelector((state) => state.authSlice);
-  const porn  = useAppSelector((state) => state.authSlice);
+  const { slNoStarts, sheetId } = useAppSelector((state) => state.authSlice);
+  const porn = useAppSelector((state) => state.authSlice);
   const [open, setOpen] = useState(false);
 
   const {
@@ -95,16 +96,18 @@ function MaterialDialogue() {
     };
 
     try {
-      const response = await fetch("/api/deleteFromInventory", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+      const response = await axiosInstance.post(
+        "/api/deleteFromInventory",
+        payload,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
         },
-        body: JSON.stringify(payload),
-      });
+      );
 
       setOpen(false);
-      const serverRes = await response.json();
+      const serverRes = response.data;
       if (serverRes?.msg === "INSUFFICIENT_MATERIALS") {
         alert("Insufficient materials available in inventory");
       } else if (serverRes?.msg === "BASEITEM_NOT_FOUND") {
@@ -112,7 +115,8 @@ function MaterialDialogue() {
       } else {
         handleSave(data);
       }
-      if (response.ok) {
+
+      if (response.status === 200) {
         console.log("Data saved successfully!");
       } else {
         throw new Error("Failed to save data");
@@ -135,18 +139,20 @@ function MaterialDialogue() {
     };
 
     try {
-      const response = await fetch("/api/googlematerial", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+      const response = await axiosInstance.post(
+        "/api/googlematerial",
+        payload,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
         },
-        body: JSON.stringify(payload),
-      });
+      );
 
       setOpen(false);
       dispatch(handleReload(12));
 
-      if (response.ok) {
+      if (response.status === 200) {
         console.log("Data saved successfully!");
         reset();
         setMaterial("");
@@ -160,11 +166,10 @@ function MaterialDialogue() {
       console.error("Error saving data:", error);
     }
   };
-
   useEffect(() => {
     const getFieldsData = async () => {
       try {
-        const { data } = await axios.get(
+        const { data } = await axiosInstance.get(
           `/api/getFields?sheetName=LIST AND OPTIONS`,
         );
         setMaterialList(data);
@@ -172,8 +177,11 @@ function MaterialDialogue() {
         console.log(error);
       }
     };
-    getFieldsData();
-  }, []);
+    // Avoid fetching fields data when sheetId is not fetched yet from user account schema. If sheetId exists , then its gonna fetch fields data
+    if (sheetId?.length > 1) {
+      getFieldsData();
+    }
+  }, [sheetId]);
 
   const extractUnit = (str: string) => {
     const match = str.match(/\[(.*?)\]/);
@@ -184,7 +192,7 @@ function MaterialDialogue() {
     return str?.replace(/\[.*?\]/, "").trim();
   };
 
-  console.log(porn , 'its like pron')
+  console.log(porn, "its like pron");
   return (
     <Dialog open={open}>
       <div className="flex items-center justify-between">

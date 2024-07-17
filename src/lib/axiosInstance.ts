@@ -12,35 +12,34 @@ axiosInstance.interceptors.request.use(
     const { sheetId, subsheetsIds } = store.getState().authSlice;
 
     // Check if it's a PUT or POST request
-    if(config.method === "post") {
+    if (config.method === "post") {
       // Modify the request body to include spreadsheetId
       config.data = {
         ...config.data,
         spreadSheetId: sheetId,
       };
-
-      
     }
-    if(config.method === "put"){
-      console.log("Inside put")
-      console.log("YELP" , subsheetsIds[config.data?.sheetName])
+
+    if (config.method === "put") {
+      console.log("Inside put");
+      console.log("YELP", subsheetsIds[config.data?.sheetName]);
       config.data = {
         ...config.data,
         spreadSheetId: sheetId,
-        subSheetId: subsheetsIds[config.data?.sheetName]
+        subSheetId: subsheetsIds[config.data?.sheetName],
       };
     }
 
-    // For GET requests, add spreadSheetId to headers
+    // For GET requests, add spreadSheetId to params
     if (config.method === "get") {
       console.log(`sheetId inside GET: ${sheetId}`);
-      
+
       // Create URLSearchParams object
       const searchParams = new URLSearchParams(config.params || {});
-      
+
       // Add spreadSheetId to the search params
-      searchParams.append('spreadSheetId', sheetId);
-      
+      searchParams.append("spreadSheetId", sheetId);
+
       // Update the config.params with the new URLSearchParams object
       config.params = searchParams;
     }
