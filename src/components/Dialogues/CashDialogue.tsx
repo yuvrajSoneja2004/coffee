@@ -9,6 +9,7 @@ import { useDispatch } from "react-redux";
 import { handleReload } from "@/redux/features/authSlice";
 import { formatDate } from "@/lib/formatDate";
 import { useForm, Controller } from "react-hook-form";
+import { axiosInstance } from "@/lib/axiosInstance";
 
 function CashDialogue() {
   const [open, setOpen] = useState(false);
@@ -28,7 +29,7 @@ function CashDialogue() {
     },
   });
 
-  const handleSave = handleSubmit((data) => {
+  const handleSave = handleSubmit(async (data) => {
     // Construct your payload with the form data
     const payload = {
       slNo: slNoStarts,
@@ -38,27 +39,25 @@ function CashDialogue() {
       remarks: data.remarks,
     };
 
-    // Send HTTP request to save data
-    fetch("/api/saveCash", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(payload),
-    })
-      .then((response) => {
-        setOpen(false);
-        if (response.ok) {
-          dispatch(handleReload(12));
-          console.log("Data saved successfully!");
-          reset();
-        } else {
-          throw new Error("Failed to save data");
-        }
-      })
-      .catch((error) => {
-        console.error("Error saving data:", error);
+    try {
+      // Send HTTP request to save data using axios
+      const response = await axiosInstance.post("/api/saveCash", payload, {
+        headers: {
+          "Content-Type": "application/json",
+        },
       });
+
+      setOpen(false);
+      if (response.status === 200) {
+        dispatch(handleReload(12));
+        console.log("Data saved successfully!");
+        reset();
+      } else {
+        throw new Error("Failed to save data");
+      }
+    } catch (error) {
+      console.error("Error saving data:", error);
+    }
   });
 
   return (

@@ -141,8 +141,6 @@ export async function POST(req: Request) {
       spreadSheetId
     } = await req.json();
 
-    console.log("galliyan" , spreadSheetId)
-
     const write = await writeToSheet(
       [
         [
