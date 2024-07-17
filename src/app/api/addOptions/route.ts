@@ -1,15 +1,23 @@
 import { auth } from "@/lib/sheetConfig";
 import { google } from "googleapis";
+import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
+import { authOptions } from "../auth/[...nextauth]/route";
 
+async function getGoogleSheetsClient(accessToken: string) {
+  const auth = new google.auth.OAuth2();
+  auth.setCredentials({ access_token: accessToken });
+  return google.sheets({ version: "v4", auth });
+}
 async function WriteToSpecificColumn(
   sheetName: string,
   columnToWrite: string,
   values: any,
   colLength: number,
+  spreadsheetId: string,
+  accessToken: string,
 ) {
-  const sheets = google.sheets({ version: "v4", auth });
-  const spreadsheetId = "1yxSl2Q_yEa-C3IjJa4MguYHd9wmnlElnJ3aaUI3MWSM";
+  const sheets = await getGoogleSheetsClient(accessToken);
   const range = `${sheetName}!${columnToWrite}${colLength + 2}`; // Appending to the entire column B
   // const range = `LIST AND OPTIONS!${columnToWrite}${colLength + 2}`; // Appending to the entire column B
   const valueInputOption = "USER_ENTERED";
@@ -30,13 +38,24 @@ async function WriteToSpecificColumn(
 }
 export async function POST(req: Request, res: Response) {
   try {
-    const { sheetName, name, currentUnit, listIndex, columnToWrite } =
-      await req.json();
-    const sheets = google.sheets({ version: "v4", auth });
-    const spreadsheetId = "1yxSl2Q_yEa-C3IjJa4MguYHd9wmnlElnJ3aaUI3MWSM";
+    const session = await getServerSession(authOptions);
+    if (!session || !session.accessToken) {
+      return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+    }
+    const {
+      sheetName,
+      name,
+      currentUnit,
+      listIndex,
+      columnToWrite,
+      spreadSheetId,
+    } = await req.json();
+    const sheets = await getGoogleSheetsClient(session.accessToken);
+
+    // const spreadsheetId = "1yxSl2Q_yEa-C3IjJa4MguYHd9wmnlElnJ3aaUI3MWSM";
     const range = `${sheetName}`;
     const response = await sheets.spreadsheets.values.get({
-      spreadsheetId,
+      spreadsheetId: spreadSheetId,
       range,
     });
     // Length of the existing column items
@@ -44,13 +63,6 @@ export async function POST(req: Request, res: Response) {
       ?.slice(1)
       ?.map((subArray) => subArray[listIndex])
       .filter((item) => item !== "" && item !== undefined).length;
-
-    console.log(
-      response.data.values
-        ?.slice(1)
-        ?.map((subArray) => subArray[3])
-        .filter((item) => item !== "" && item !== undefined),
-    );
 
     // Checking if both name and currentUnit are passed in request body
     if (!name || !currentUnit || !listIndex) {
@@ -64,6 +76,8 @@ export async function POST(req: Request, res: Response) {
       columnToWrite,
       [`${name}[${currentUnit}]`],
       columnsLen as number,
+      spreadSheetId,
+      session.accessToken as string,
     );
 
     return NextResponse.json({

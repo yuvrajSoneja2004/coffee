@@ -1,27 +1,27 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import Breadcrumb from "../Breadcrumbs/Breadcrumb";
 import axios from "axios";
 import {
   Table,
   TableBody,
-  TableCaption,
   TableCell,
   TableHead,
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Button } from "../ui/button";
-import { Plus } from "lucide-react";
 import ManageDialogue from "../Dialogues/ManageListsDialogue";
+import { axiosInstance } from "@/lib/axiosInstance";
+import { useAppSelector } from "@/redux/store";
 
 function ManageLists() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const { sheetId } = useAppSelector((state) => state.authSlice);
+
   const [data, setData] = useState([]);
   const getData = async () => {
     setIsLoading(true);
     try {
-      const { data } = await axios.get(`/api/manageLists`);
+      const { data } = await axiosInstance.get(`/api/manageLists`);
       console.log(data);
       setData(data);
     } catch (error) {
@@ -32,8 +32,10 @@ function ManageLists() {
   };
 
   useEffect(() => {
-    getData();
-  }, []);
+    if (sheetId?.length > 1) {
+      getData();
+    }
+  }, [sheetId]);
 
   // Utility functions to extract data using regex
   const extractUnit = (str: string) => {
@@ -60,7 +62,7 @@ function ManageLists() {
             {data
               ?.slice(1)
               ?.map((subArray) => subArray[0])
-              .filter((item) => item !== "")
+              .filter((item) => item !== "" && item !== undefined)
               .map((item, index) => (
                 <TableRow key={index}>
                   <TableCell className="font-medium">{item}</TableCell>
@@ -87,7 +89,7 @@ function ManageLists() {
             {data
               ?.slice(1)
               ?.map((subArray) => subArray[1])
-              .filter((item) => item !== "")
+              .filter((item) => item !== "" && item !== undefined)
               .map((item, index) => (
                 <TableRow key={index}>
                   <TableCell className="font-medium">
@@ -97,11 +99,11 @@ function ManageLists() {
               ))}
           </TableBody>
         </Table>
-        {/* Soluctions */}
+        {/* Solutions */}
         <Table className="bg-white">
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[90%] font-bold">Soluctions</TableHead>
+              <TableHead className="w-[90%] font-bold">Solutions</TableHead>
               <TableHead className="font-bold">
                 <ManageDialogue
                   sheetName="LIST AND OPTIONS"
@@ -116,7 +118,7 @@ function ManageLists() {
             {data
               ?.slice(1)
               ?.map((subArray) => subArray[2])
-              .filter((item) => item !== "")
+              .filter((item) => item !== "" && item !== undefined)
               .map((item, index) => (
                 <TableRow key={index}>
                   <TableCell className="font-medium">
@@ -145,7 +147,7 @@ function ManageLists() {
             {data
               ?.slice(1)
               ?.map((subArray) => subArray[3])
-              .filter((item) => item !== "")
+              .filter((item) => item !== "" && item !== undefined)
               .map((item, index) => (
                 <TableRow key={index}>
                   <TableCell className="font-medium">
@@ -174,7 +176,7 @@ function ManageLists() {
             {data
               ?.slice(1)
               ?.map((subArray) => subArray[4])
-              .filter((item) => item !== "")
+              .filter((item) => item !== "" && item !== undefined)
               .map((item, index) => (
                 <TableRow key={index}>
                   <TableCell className="font-medium">

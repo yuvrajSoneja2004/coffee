@@ -14,14 +14,17 @@ import {
 import { Button } from "../ui/button";
 import { Plus } from "lucide-react";
 import ManageDialogue from "../Dialogues/ManageListsDialogue";
+import { axiosInstance } from "@/lib/axiosInstance";
+import { useAppSelector } from "@/redux/store";
 
 function ManageListsA() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [data, setData] = useState([]);
+  const { sheetId } = useAppSelector((state) => state.authSlice);
   const getData = async () => {
     setIsLoading(true);
     try {
-      const { data } = await axios.get(`/api/manageListsA`);
+      const { data } = await axiosInstance.get(`/api/manageListsA`);
       console.log(data);
       setData(data);
     } catch (error) {
@@ -32,8 +35,10 @@ function ManageListsA() {
   };
 
   useEffect(() => {
-    getData();
-  }, []);
+    if (sheetId?.length > 1) {
+      getData();
+    }
+  }, [sheetId]);
 
   console.log(
     data

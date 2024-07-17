@@ -16,6 +16,7 @@ import { useDispatch } from "react-redux";
 import { handleReload } from "@/redux/features/authSlice";
 import { formatDate } from "@/lib/formatDate";
 import { useForm, Controller } from "react-hook-form";
+import { axiosInstance } from "@/lib/axiosInstance";
 
 function MeteorologicalDialogue() {
   const dispatch = useDispatch();
@@ -60,16 +61,18 @@ function MeteorologicalDialogue() {
     };
 
     try {
-      const response = await fetch("/api/addMeteorological", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+      const response = await axiosInstance.post(
+        "/api/addMeteorological",
+        payload,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
         },
-        body: JSON.stringify(payload),
-      });
+      );
 
       setOpen(false);
-      if (response.ok) {
+      if (response.status === 200) {
         dispatch(handleReload(12));
         console.log("Data saved successfully!");
         reset();
