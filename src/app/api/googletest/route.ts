@@ -109,7 +109,6 @@ export async function GET(req: Request) {
         msg: "Provide sheetName from client",
       });
     }
-    console.log(sheetName)
 
     const sheetRes = await readSheet(sheetName, session.accessToken as string , spreadSheetId);
     return NextResponse.json(sheetRes);

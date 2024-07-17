@@ -35,7 +35,7 @@ function DailyWorkDataDialogue() {
   const [singleDetailOfWork, setSingleDetailOfWork] = useState("");
   const [treeListValue, setTreeListValue] = useState("");
   const [block, setBlock] = useState("");
-  const { slNoStarts } = useAppSelector((state) => state.authSlice);
+  const { slNoStarts, sheetId } = useAppSelector((state) => state.authSlice);
   const [open, setOpen] = useState(false);
 
   const dispatch = useDispatch();
@@ -122,8 +122,11 @@ function DailyWorkDataDialogue() {
         console.log(error);
       }
     };
-    getFieldsData();
-  }, []);
+    // Avoid fetching fields data when sheetId is not fetched yet from user account schema. If sheetId exists , then its gonna fetch fields data
+    if (sheetId.length > 1) {
+      getFieldsData();
+    }
+  }, [sheetId]);
 
   return (
     <Dialog open={open}>

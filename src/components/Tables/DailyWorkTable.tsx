@@ -50,6 +50,7 @@ function DailyWorkTable({ sheetName }: DailyWorkTableProps) {
         `/api/googletest?sheetName=${sheetName}&subSheetId=${subsheetsIds[sheetName]}`,
       );
       const [headerRow, ...dataRows] = data;
+      console.log(data, "dasta");
       setHeaders(headerRow);
 
       // Group data by dates
